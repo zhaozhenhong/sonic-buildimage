@@ -1,0 +1,150 @@
+{# ------------------------------------------------------------ #}
+{# this is called with the "vrf" and "address-family matched    #}
+{# ------------------------------------------------------------ #}
+{% if n_af_val.has_key('admin_status') %}
+{% if n_af_val['admin_status'] == 'true' %}
+  neighbor {{nbr_name}} activate
+{% else %}
+  no neighbor {{nbr_name}} activate
+{% endif %}
+{% endif %}
+{% if n_af_val.has_key('tx_add_paths') %}
+{% if n_af_val['tx_add_paths'] == 'tx_all_paths' %}
+  neighbor {{nbr_name}} addpath-tx-all-paths
+{% elif n_af_val['tx_add_paths'] == 'tx_best_path_per_as' %}
+  neighbor {{nbr_name}} addpath-tx-bestpath-per-AS
+{% endif %}
+{% endif %}
+{% if n_af_val.has_key('nhself') and n_af_val['nhself'] == 'true' %}
+{% if n_af_val.has_key('nexthop_self_force') and n_af_val['nexthop_self_force'] == 'true' %}
+  neighbor {{nbr_name}} next-hop-self force
+{% else %}
+  neighbor {{nbr_name}} next-hop-self
+{% endif %}
+{% endif %}
+{% if n_af_val.has_key('remove_private_as_enabled') and n_af_val['remove_private_as_enabled'] == 'true' %}
+{% set ns = namespace(rpas_str='') %}
+{% if n_af_val.has_key('remove_private_as_all') and n_af_val['remove_private_as_all'] == 'true' %}
+{% set ns.rpas_str = ns.rpas_str + ' all' %}
+{% endif %}
+{% if n_af_val.has_key('replace_private_as') and n_af_val['replace_private_as'] == 'true' %}
+{% set ns.rpas_str = ns.rpas_str + ' replace-AS' %}
+{% endif %}
+  neighbor {{nbr_name}} remove-private-AS{{ns.rpas_str}}
+{% endif %}
+{% if n_af_val.has_key('send_community') %}
+{% if n_af_val['send_community'] == 'standard' %}
+  no neighbor {{nbr_name}} send-community extended
+  no neighbor {{nbr_name}} send-community large
+{% elif n_af_val['send_community'] == 'extended' %}
+  no neighbor {{nbr_name}} send-community
+  no neighbor {{nbr_name}} send-community large
+{% elif n_af_val['send_community'] == 'large' %}
+  no neighbor {{nbr_name}} send-community
+  no neighbor {{nbr_name}} send-community extended
+{% elif n_af_val['send_community'] == 'both' %}
+  no neighbor {{nbr_name}} send-community large
+{% elif n_af_val['send_community'] == 'none' %}
+  no neighbor {{nbr_name}} send-community all
+{% endif %}
+{% endif %}
+{% if n_af_val.has_key('as_override') and n_af_val['as_override'] == 'true' %}
+  neighbor {{nbr_name}} as-override
+{% endif %}
+{% if n_af_val.has_key('send_default_route') and n_af_val['send_default_route'] == 'true' %}
+{% if n_af_val.has_key('default_rmap') %}
+  neighbor {{nbr_name}} default-originate route-map {{n_af_val['default_rmap']}}
+{% else %}
+  neighbor {{nbr_name}} default-originate
+{% endif %}
+{% endif %}
+{% if n_af_val.has_key('rrclient') and n_af_val['rrclient'] == 'true' %}
+  neighbor {{nbr_name}} route-reflector-client
+{% endif %}
+{% if n_af_val.has_key('soft_reconfiguration_in') and n_af_val['soft_reconfiguration_in'] == 'true' %}
+  neighbor {{nbr_name}} soft-reconfiguration inbound
+{% endif %}
+{# ------- maximum-prefix --------------------------- #}
+{% if n_af_val.has_key('max_prefix_limit') %}
+{% set ns = namespace(mpfx_str='maximum-prefix ' + n_af_val['max_prefix_limit']) %}
+{% if n_af_val.has_key('max_prefix_warning_threshold') %}
+{% set ns.mpfx_str = ns.mpfx_str + ' ' + n_af_val['max_prefix_warning_threshold'] %}
+{% endif %}
+{% if n_af_val.has_key('max_prefix_restart_interval') %}
+{% set ns.mpfx_str = ns.mpfx_str + ' restart ' + n_af_val['max_prefix_restart_interval'] %}
+{% elif n_af_val.has_key('max_prefix_warning_only') and n_af_val['max_prefix_warning_only'] == 'true' %}
+{% set ns.mpfx_str = ns.mpfx_str + ' warning-only' %}
+{% endif %}
+  neighbor {{nbr_name}} {{ns.mpfx_str}}
+{% endif %}
+{# ------- maximum-prefix end --------------------------- #}
+{% if n_af_val.has_key('route_server_client') and n_af_val['route_server_client'] == 'true' %}
+  neighbor {{nbr_name}} route-server-client
+{% endif %}
+{# ------- allow-as --------------------------- #}
+{% if n_af_val.has_key('allow_as_in') and n_af_val['allow_as_in'] == 'true' %}
+{% if n_af_val.has_key('allow_as_origin') and n_af_val['allow_as_origin'] == 'true' %}
+  neighbor {{nbr_name}} allowas-in origin
+{% elif n_af_val.has_key('allow_as_count') %}
+  neighbor {{nbr_name}} allowas-in {{n_af_val['allow_as_count']}}
+{% else %}
+  neighbor {{nbr_name}} allowas-in
+{% endif %}
+{% endif %}
+{# ------- allow-as end --------------------------- #}
+{% if n_af_val.has_key('add_path_tx_all') and n_af_val['add_path_tx_all'] == 'true' %}
+  neighbor {{nbr_name}} addpath-tx-all-paths
+{% endif %}
+{% if n_af_val.has_key('add_path_tx_bestpath') and n_af_val['add_path_tx_bestpath'] == 'true' %}
+  neighbor {{nbr_name}} addpath-tx-bestpath-per-AS
+{% endif %}
+{% if n_af_val.has_key('cap_orf') %}
+  neighbor {{nbr_name}} capability orf prefix-list {{n_af_val['cap_orf']}}
+{% endif %}
+{% if n_af_val.has_key('weight') %}
+  neighbor {{nbr_name}} weight {{n_af_val['weight']}}
+{% endif %}
+{% if n_af_val.has_key('prefix_list_in') %}
+  neighbor {{nbr_name}} prefix-list {{n_af_val['prefix_list_in']}} in
+{% endif %}
+{% if n_af_val.has_key('prefix_list_out') %}
+  neighbor {{nbr_name}} prefix-list {{n_af_val['prefix_list_out']}} out
+{% endif %}
+{# ------- route-map in --------------------------- #}
+{% if n_af_val.has_key('route_map_in') %}
+{% for map in n_af_val['route_map_in'] %}
+  neighbor {{nbr_name}} route-map {{map}} in
+{% endfor %}
+{% endif %}
+{# ------- route-map in end --------------------------- #}
+{# ------- route-map out --------------------------- #}
+{% if n_af_val.has_key('route_map_out') %}
+{% for map in n_af_val['route_map_out'] %}
+  neighbor {{nbr_name}} route-map {{map}} out
+{% endfor %}
+{% endif %}
+{# ------- route-map out end --------------------------- #}
+{% if n_af_val.has_key('unsuppress_map_name') %}
+  neighbor {{nbr_name}} unsuppress-map {{n_af_val['unsuppress_map_name']}}
+{% endif %}
+{% if n_af_val.has_key('filter_list_in') %}
+  neighbor {{nbr_name}} filter-list {{n_af_val['filter_list_in']}} in
+{% endif %}
+{% if n_af_val.has_key('filter_list_out') %}
+  neighbor {{nbr_name}} filter-list {{n_af_val['filter_list_out']}} out
+{% endif %}
+{# ------- attribute-unchanged --------------------------- #}
+{% set attr = '' %}
+{% if n_af_val.has_key('unchanged_as_path') and n_af_val['unchanged_as_path'] == 'true' %}
+{% set attr = 'as-path ' %}
+{% endif %}
+{% if n_af_val.has_key('unchanged_med') and n_af_val['unchanged_med'] == 'true' %}
+{% set attr = attr + 'med ' %}
+{% endif %}
+{% if n_af_val.has_key('unchanged_nexthop') and n_af_val['unchanged_nexthop'] == 'true' %}
+{% set attr = attr + 'next-hop' %}
+{% endif %}
+{% if attr != '' %}
+  neighbor {{nbr_name}} attribute-unchanged {{attr}}
+{% endif %}
+{# ------- attribute-unchanged end --------------------------- #}

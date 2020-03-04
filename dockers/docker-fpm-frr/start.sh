@@ -34,12 +34,24 @@ rm -f /var/run/rsyslogd.pid
 supervisorctl start rsyslogd
 
 # start eoiu pulling, only if configured so
-if [[ $(sonic-cfggen -d -v 'WARM_RESTART.bgp.bgp_eoiu') == 'true' ]]; then
-    supervisorctl start bgp_eoiu_marker
+HAS_EOIU_CONFIG=$(sonic-cfggen -d -v "1 if WARM_RESTART and WARM_RESTART.bgp.bgp_eoiu")
+if [ "$HAS_EOIU_CONFIG" == "1" ]; then
+    if [[ $(sonic-cfggen -d -v 'WARM_RESTART.bgp.bgp_eoiu') == 'true' ]]; then
+        supervisorctl start bgp_eoiu_marker
+    fi
 fi
 
 # Start Quagga processes
 supervisorctl start zebra
+
+secs=30
+while ((secs-- > 0))
+do
+    zebra_ready=$(netstat -tulpn | grep LISTEN | grep zebra)
+    [[ ! -z $zebra_ready ]] && break
+    sleep 1
+done
+
 supervisorctl start staticd
 supervisorctl start bgpd
 
@@ -49,4 +61,12 @@ fi
 
 supervisorctl start fpmsyncd
 
-supervisorctl start bgpcfgd
+BGP_ASN=`sonic-cfggen -d -v 'DEVICE_METADATA["localhost"]["bgp_asn"]'`
+if [ -z "$BGP_ASN" ]; then
+    supervisorctl start bfdd
+    supervisorctl start ospfd
+    supervisorctl start pimd
+    supervisorctl start bgpcfgd_db
+else
+    supervisorctl start bgpcfgd
+fi
