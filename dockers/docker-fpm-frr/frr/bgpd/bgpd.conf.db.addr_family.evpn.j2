@@ -1,0 +1,78 @@
+{% if af_val.has_key('advertise-all-vni') and af_val['advertise-all-vni'] == 'true' %}
+  advertise-all-vni
+{% endif %}
+{% if af_val.has_key('autort') %}
+  autort {{af_val['autort']}}
+{% endif %}
+{% if af_val.has_key('advertise-default-gw') and af_val['advertise-default-gw'] == 'true' %}
+  advertise-default-gw
+{% endif %}
+{% if af_val.has_key('dad-enabled') and af_val.has_key('dad-max-moves') and af_val.has_key('dad-time') %}
+  dup-addr-detection max-moves {{af_val['dad-max-moves']}} time {{af_val['dad-time']}}
+{% endif %}
+{% if af_val.has_key('dad-freeze') %}
+  dup-addr-detection freeze {{af_val['dad-freeze']}}
+{% endif %}
+{% if af_val.has_key('advertise-ipv4-unicast') and af_val['advertise-ipv4-unicast'] == 'true' %}
+  advertise ipv4 unicast
+{% endif %}
+{% if af_val.has_key('advertise-ipv6-unicast') and af_val['advertise-ipv6-unicast'] == 'true' %}
+  advertise ipv6 unicast
+{% endif %}
+{% if af_val.has_key('default-originate-ipv4') and af_val['default-originate-ipv4'] == 'true' %}
+  default-originate ipv4
+{% endif %}
+{% if af_val.has_key('default-originate-ipv6') and af_val['default-originate-ipv6'] == 'true' %}
+  default-originate ipv6
+{% endif %}
+{% if af_val.has_key('route-distinguisher') %}
+  rd {{af_val['route-distinguisher']}}
+{% endif %}
+{% if af_val.has_key('import-rts') %}
+{% for irt in af_val['import-rts'] %}
+  route-target import {{irt}}
+{% endfor %}
+{% endif %}
+{% if af_val.has_key('export-rts') %}
+{% for irt in af_val['export-rts'] %}
+  route-target export {{irt}}
+{% endfor %}
+{% endif %}
+{% if BGP_GLOBALS_EVPN_RT is defined and BGP_GLOBALS_EVPN_RT|length > 0 %}
+{% for evpn_rt_key, evpn_rt_val in BGP_GLOBALS_EVPN_RT.iteritems() %}
+{% if vrf == evpn_rt_key[0] %}
+  route-target {{evpn_rt_val['route-target-type']}} {{evpn_rt_key[2]}} 
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if BGP_GLOBALS_EVPN_VNI is defined and BGP_GLOBALS_EVPN_VNI|length > 0 %}
+{% for vni_key, vni_val in BGP_GLOBALS_EVPN_VNI.iteritems() %}
+{% if vrf == vni_key[0] %}
+   vni {{vni_key[2]}}
+{% if vni_val.has_key('route-distinguisher') %}
+    rd {{vni_val['route-distinguisher']}}
+{% endif %}
+{% if vni_val.has_key('import-rts') %}
+{% for irt in vni_val['import-rts'] %}
+  route-target import {{irt}}
+{% endfor %}
+{% endif %}
+{% if vni_val.has_key('export-rts') %}
+{% for irt in vni_val['export-rts'] %}
+  route-target export {{irt}}
+{% endfor %}
+{% endif %}
+{% if BGP_GLOBALS_EVPN_VNI_RT is defined and BGP_GLOBALS_EVPN_VNI_RT|length > 0 %}
+{% for vni_rt_key, vni_rt_val in BGP_GLOBALS_EVPN_VNI_RT.iteritems() %}
+{% if vrf == vni_rt_key[0] and vni_key[2] == vni_rt_key[2] %}
+    route-target {{vni_rt_val['route-target-type']}} {{vni_rt_key[3]}} 
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if vni_val.has_key('advertise-default-gw') and vni_val['advertise-default-gw'] == 'true' %}
+    advertise-default-gw
+{% endif %}
+   exit-vni
+{% endif %}
+{% endfor %}
+{% endif %}

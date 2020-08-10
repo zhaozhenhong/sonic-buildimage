@@ -1,0 +1,29 @@
+{% set vlinkareaid = vlinkkey[1] %}
+{% set vlinkid = vlinkkey[2] %}
+  area {{ vlinkareaid }} virtual-link {{ vlinkid }}
+{% if vlink_instance.has_key('authentication') %}
+{% if vlink_instance['authentication'] == 'MD5HMAC' %}
+  area {{ vlinkareaid }} virtual-link {{ vlinkid }} authentication message-digest
+{% else %}
+  area {{ vlinkareaid }} virtual-link {{ vlinkid }} null
+{% endif %}
+{% endif %}
+{% if vlink_instance.has_key('authentication-key') %}
+  area {{ vlinkareaid }} virtual-link {{ vlinkid }} authentication-key {{ vlink_instance['authentication-key'] }}
+{% endif %}
+{% if vlink_instance.has_key('authentication-key-id') and vlink_instance.has_key('authentication-md5-key') %}
+  area {{ vlinkareaid }} virtual-link {{ vlinkid }} authentication message-digest message-digest-key {{ vlink_instance['authentication-key-id'] }} md5 {{ vlink_instance['authentication-md5-key'] }}
+{% endif %}
+{% if vlink_instance.has_key('dead-interval') %}
+  area {{ vlinkareaid }} virtual-link {{ vlinkid }} dead-interval {{ vlink_instance['dead-interval'] }}
+{% endif %}
+{% if vlink_instance.has_key('hello-interval') %}
+  area {{ vlinkareaid }} virtual-link {{ vlinkid }} hello-interval {{ vlink_instance['hello-interval'] }}
+{% endif %}
+{% if vlink_instance.has_key('retransmission-interval') %}
+  area {{ vlinkareaid }} virtual-link {{ vlinkid }} retransmit-interval {{ vlink_instance['retransmission-interval'] }}
+{% endif %}
+{% if vlink_instance.has_key('transmit-delay') %}
+  area {{ vlinkareaid }} virtual-link {{ vlinkid }} transmit-delay {{ vlink_instance['transmit-delay'] }}
+{% endif %}
+

@@ -49,8 +49,44 @@ stderr_logfile=syslog
 dependent_startup=true
 dependent_startup_wait_for=zebra:running
 
+[program:bfdd]
+command=/usr/lib/frr/bfdd -A 127.0.0.1
+priority=4
+stopsignal=KILL
+autostart=false
+autorestart=false
+startsecs=0
+stdout_logfile=syslog
+stderr_logfile=syslog
+dependent_startup=true
+dependent_startup_wait_for=zebra:running
+
 [program:bgpd]
 command=/usr/lib/frr/bgpd -A 127.0.0.1 -M snmp
+priority=5
+stopsignal=KILL
+autostart=false
+autorestart=false
+startsecs=0
+stdout_logfile=syslog
+stderr_logfile=syslog
+dependent_startup=true
+dependent_startup_wait_for=zebra:running
+
+[program:ospfd]
+command=/usr/lib/frr/ospfd -A 127.0.0.1 -M snmp
+priority=5
+stopsignal=KILL
+autostart=false
+autorestart=false
+startsecs=0
+stdout_logfile=syslog
+stderr_logfile=syslog
+dependent_startup=true
+dependent_startup_wait_for=zebra:running
+
+[program:pimd]
+command=/usr/lib/frr/pimd -A 127.0.0.1
 priority=5
 stopsignal=KILL
 autostart=false
@@ -73,7 +109,11 @@ dependent_startup=true
 dependent_startup_wait_for=bgpd:running
 
 [program:bgpcfgd]
+{% if DEVICE_METADATA.localhost.bgp_template_config is defined and DEVICE_METADATA.localhost.bgp_template_config == "false" %}
+command=/usr/local/bin/bgpcfgd_no_template
+{% else %}
 command=/usr/local/bin/bgpcfgd
+{% endif %}
 priority=6
 autostart=false
 autorestart=false

@@ -1,0 +1,150 @@
+{% if ROUTE_MAP is defined and ROUTE_MAP|length > 0 %}
+{% for rm_key, rm_val in ROUTE_MAP.items() %}
+{% if rm_val.has_key('route_operation') %}
+!
+route-map {{rm_key[0]}} {{rm_val['route_operation']}} {{rm_key[1]}}
+{% if rm_val.has_key('match_as_path') %}
+ match as-path {{rm_val['match_as_path']}}
+{% endif %}
+{% if rm_val.has_key('call_route_map') %}
+ call {{rm_val['call_route_map']}}
+{% endif %}
+{% if rm_val.has_key('match_community') %}
+ match community {{rm_val['match_community']}}
+{% endif %}
+{% if rm_val.has_key('match_ext_community') %}
+ match extcommunity {{rm_val['match_ext_community']}}
+{% endif %}
+{% if rm_val.has_key('match_interface') %}
+ match interface {{rm_val['match_interface']}}
+{% endif %}
+{% if rm_val.has_key('match_tag') %}
+ match tag {{rm_val['match_tag'][0]}}
+{% endif %}
+{% if rm_val.has_key('match_src_vrf') %}
+ match source-vrf {{rm_val['match_src_vrf']}}
+{% endif %}
+{# ---------------match ip/ipv6-Start-------------------------- #}
+{% set ip_str = {'ipv4':'ip', 'ipv6':'ipv6' } %}
+{% if PREFIX_SET is defined and PREFIX_SET|length > 0 %}
+{% if rm_val.has_key('match_prefix_set') %}
+{% for pfx_key, pfx_val in PREFIX_SET.items() %}
+{% if rm_val['match_prefix_set'] == pfx_key %}
+ match {{ip_str[pfx_val['mode']]}} address prefix-list {{rm_val['match_prefix_set']}}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if rm_val.has_key('match_next_hop_set') %}
+{% for pfx_key, pfx_val in PREFIX_SET.items() %}
+{% if rm_val['match_next_hop_set'] == pfx_key %}
+ match {{ip_str[pfx_val['mode']]}} next-hop prefix-list {{rm_val['match_next_hop_set']}}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endif %}
+{# ---------------match ip/ipv6-  End-------------------------- #}
+{% if rm_val.has_key('match_local_pref') %}
+ match local-preference {{rm_val['match_local_pref']}}
+{% endif %}
+{% if rm_val.has_key('match_med') %}
+ match metric {{rm_val['match_med']}}
+{% endif %}
+{% if rm_val.has_key('match_origin') %}
+ match origin {{rm_val['match_origin']|lower}}
+{% endif %}
+{% if rm_val.has_key('match_neighbor') %}
+ match peer {{rm_val['match_neighbor'][0]}}
+{% endif %}
+{% if rm_val.has_key('match_protocol') %}
+ match source-protocol {{rm_val['match_protocol']}}
+{% endif %}
+{# ---------------set as-path prepend - Start ----------------- #}
+{% if rm_val.has_key('set_asn') and rm_val.has_key('set_repeat_asn') %}
+{% set ns = namespace(as_str='') %}
+{% if rm_val['set_repeat_asn'] > 0 %}
+{% for i in range(rm_val['set_repeat_asn']|int) %}
+{% set ns.as_str = ns.as_str+' '+rm_val['set_asn'] %}
+{% endfor %}
+{% else %}
+{% set ns.as_str = rm_val['set_asn'] %}
+{% endif %}
+ set as-path prepend{{ns.as_str}}
+{% endif %}
+{# ---------------set as-path prepend - End ------------------- #}
+{# ---------------set community - Start------------------------ #}
+{% if rm_val.has_key('set_community_inline') %}
+{% set ns = namespace(comms = '') %}
+{% for cm in rm_val['set_community_inline'] %}
+{% set ns.comms = ns.comms + ' ' + cm %}
+{% endfor %}
+ set community{{ns.comms}}
+{% endif %}
+{# ---------------set community - End-------------------------- #}
+{% if rm_val.has_key('set_community_ref') %}
+ set community {{rm_val['set_community_ref']}}
+{% endif %}
+{# ---------------set extcommunity - Start--------------------- #}
+{% if rm_val.has_key('set_ext_community_inline') %}
+{% set ec_ns = namespace(rt_str='', soo_str='') %}
+{% for ext_comm in rm_val['set_ext_community_inline'] %}
+{% set comm  = ext_comm.split(':') %}
+{% if comm[0] == 'route-target' %}
+{% set ec_ns.rt_str = ec_ns.rt_str+' '+comm[1]+':'+comm[2] %}
+{% endif %}
+{% if comm[0] == 'route-origin' %}
+{% set ec_ns.soo_str = ec_ns.soo_str+' '+comm[1]+':'+comm[2] %}
+{% endif %}
+{% endfor %}
+{% if ec_ns.rt_str != '' %}
+ set extcommunity rt{{ec_ns.rt_str}}
+{% endif %}
+{% if ec_ns.soo_str != '' %}
+ set extcommunity soo{{ec_ns.rt_str}}
+{% endif %}
+{% endif %}
+{# ---------------set extcommunity - End----------------------- #}
+{% if rm_val.has_key('set_ext_community_ref') %}
+ set extcommunity {{rm_val['set_ext_community_ref']}}
+{% endif %}
+{% if rm_val.has_key('set_next_hop') %}
+ set ip next-hop {{rm_val['set_next_hop']}}
+{% endif %}
+{% if rm_val.has_key('set_ipv6_next_hop_global') %}
+ set ipv6 next-hop global {{rm_val['set_ipv6_next_hop_global']}}
+{% endif %}
+{% if rm_val.has_key('set_ipv6_next_hop_prefer_global') and rm_val['set_ipv6_next_hop_prefer_global'] == 'true' %}
+ set ipv6 next-hop prefer-global
+{% endif %}
+{% if rm_val.has_key('set_local_preference') %}
+ set local-preference {{rm_val['set_local_preference']}}
+{% endif %}
+{# ---------------set metric and med - Start--------------------- #}
+{% if rm_val.has_key('set_metric_action') %}
+{% if rm_val.has_key('set_metric') %}
+{% if rm_val['set_metric_action'] == 'METRIC_SET_VALUE' %}
+ set metric {{rm_val['set_metric']}}
+{% elif rm_val['set_metric_action'] == 'METRIC_ADD_VALUE' %}
+ set metric +{{rm_val['set_metric']}}
+{% elif rm_val['set_metric_action'] == 'METRIC_SUBTRACT_VALUE' %}
+ set metric -{{rm_val['set_metric']}}
+{% endif %}
+{% endif %}
+{% if rm_val['set_metric_action'] == 'METRIC_SET_RTT' %}
+ set metric rtt
+{% elif rm_val['set_metric_action'] == 'METRIC_ADD_RTT' %}
+ set metric +rtt
+{% elif rm_val['set_metric_action'] == 'METRIC_SUBTRACT_RTT' %}
+ set metric -rtt
+{% endif %}
+{% elif rm_val.has_key('set_med') %}
+ set metric {{rm_val['set_med']}}
+{% elif rm_val.has_key('set_metric') %}
+ set metric {{rm_val['set_metric']}}
+{% endif %}
+{# ---------------set metric and med - End--------------------- #}
+{% if rm_val.has_key('set_origin') %}
+ set origin {{rm_val['set_origin']|lower}}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}

@@ -18,7 +18,11 @@ agentx
 {%  include "bgpd.spine_chassis_frontend_router.conf.j2" %}
 {% endif %}
 !
+{% if DEVICE_METADATA['localhost'].has_key('bgp_template_config') and DEVICE_METADATA['localhost']['bgp_template_config'] == 'false' %}
+{% include "bgpd.conf.db.j2" %}
+{% else %}
 {% include "bgpd.main.conf.j2" %}
+{% endif %}
 !
 ! end of template: bgpd/bgpd.conf.j2
 !

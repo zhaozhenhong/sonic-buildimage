@@ -1,0 +1,76 @@
+{# ------------------------------------------------------------------------------------ #}
+{# ------------------------------------------------------------------------------------ #}
+{% if OSPFV2_INTERFACE is defined and OSPFV2_INTERFACE|length > 0 %}
+{% for (intfkey, ospf_intf_instance) in OSPFV2_INTERFACE.iteritems() %}
+!
+{% set intfname = intfkey[0] %}
+{% set intfaddr = intfkey[1] %}
+{% if intfaddr == "0.0.0.0" %}
+{% set intfaddr = "" %}
+{% endif %}
+interface {{ intfname }}
+{% if ospf_intf_instance.has_key('area-id') %}
+  ip ospf area {{ ospf_intf_instance['area-id'] }} {{ intfaddr }}
+{% endif %}
+{% if ospf_intf_instance.has_key('network-type') %}
+{% if ospf_intf_instance['network-type'] == 'BROADCAST_NETWORK' %}
+  ip ospf network broadcast {{ intfaddr }}
+{% endif %}
+{% if ospf_intf_instance['network-type'] == 'POINT_TO_POINT_NETWORK' %}
+  ip ospf network point-to-point {{ intfaddr }}
+{% endif %}
+{% endif %}
+{% if ospf_intf_instance.has_key('metric') %}
+  ip ospf cost {{ ospf_intf_instance['metric'] }} {{ intfaddr }}
+{% endif %}
+{% if ospf_intf_instance.has_key('priority') %}
+  ip ospf priority {{ ospf_intf_instance['priority'] }} {{ intfaddr }}
+{% endif %}
+{% if ospf_intf_instance.has_key('mtu-ignore') %}
+{% if ospf_intf_instance['mtu-ignore'] == 'true' %}
+  ip ospf mtu-ignore {{ intfaddr }}
+{% endif %}
+{% endif %}
+{% if ospf_intf_instance.has_key('bfd-enable') %}
+{% if ospf_intf_instance['bfd-enable'] == 'true' %}
+  ip ospf bfd
+{% endif %}
+{% endif %}
+{% if ospf_intf_instance.has_key('authentication-type') %}
+{% if ospf_intf_instance['authentication-type'] == 'MD5HMAC' %}
+  ip ospf authentication message-digest {{ intfaddr }}
+{% endif %}
+{% if ospf_intf_instance['authentication-type'] == 'NONE' %}
+  ip ospf authentication null {{ intfaddr }}
+{% endif %}
+{% if ospf_intf_instance['authentication-type'] == 'TEXT' %}
+  ip ospf authentication {{ intfaddr }}
+{% endif %}
+{% endif %}
+{% if ospf_intf_instance.has_key('authentication-key') %}
+  ip ospf authentication-key {{ ospf_intf_instance['authentication-key'] }} {{ intfaddr }}
+{% endif %}
+{% if ospf_intf_instance.has_key('authentication-key-id') and ospf_intf_instance.has_key('authentication-md5-key') %}
+  ip ospf message-digest-key {{ ospf_intf_instance['authentication-key-id'] }} md5 {{ ospf_intf_instance['authentication-md5-key'] }} {{ intfaddr }}
+{% endif %}
+{% if ospf_intf_instance.has_key('dead-interval') %}
+  ip ospf dead-interval {{ ospf_intf_instance['dead-interval'] }} {{ intfaddr }}
+{% endif %}
+{% if ospf_intf_instance.has_key('dead-interval-minimal') %}
+{% if ospf_intf_instance.has_key('hello-multiplier') %}
+  ip ospf dead-interval minimal hello-multiplier {{ ospf_intf_instance['hello-multiplier'] }} {{ intfaddr }}
+{% else %}
+  ip ospf dead-interval minimal {{ intfaddr }}
+{% endif %}
+{% endif %}
+{% if ospf_intf_instance.has_key('hello-interval') %}
+  ip ospf hello-interval {{ ospf_intf_instance['hello-interval'] }} {{ intfaddr }}
+{% endif %}
+{% if ospf_intf_instance.has_key('retransmission-interval') %}
+  ip ospf retransmit-interval {{ ospf_intf_instance['retransmission-interval'] }} {{ intfaddr }}
+{% endif %}
+{% if ospf_intf_instance.has_key('transmit-delay') %}
+  ip ospf transmit-delay {{ ospf_intf_instance['transmit-delay'] }} {{ intfaddr }}
+{% endif %}
+{% endfor %}
+{% endif %}
