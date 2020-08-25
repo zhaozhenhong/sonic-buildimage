@@ -500,6 +500,8 @@ class BGPKeyMapInfo:
         return set(self.daemons) == set(other.daemons) and self.run_cmd == other.run_cmd
     def __ne__(self, other):
         return set(self.daemons) != set(other.daemons) or self.run_cmd != other.run_cmd
+    def __hash__(self):
+        return hash(self.run_cmd)
     def get_command(self, daemon, op, st_idx, *vals):
         return self.hdl_func(daemon, self.run_cmd, op, st_idx, vals, self.data)
     def __str__(self):
@@ -547,9 +549,9 @@ class BGPKeyMapList(list):
                         pass
             super(BGPKeyMapList, self).append((db_field, BGPKeyMapInfo(cmd_str, hdl_func, hdl_data)))
     def __eq__(self, other):
-        return super(BGPKeyMapList, self).__eq__(other) and self.table_name == other.table_name and self.table_key == self.table_key
+        return super(BGPKeyMapList, self).__eq__(other) and self.table_name == other.table_name and self.table_key == other.table_key
     def __ne__(self, other):
-        return super(BGPKeyMapList, self).__ne__(other) or self.table_name != other.table_name or self.table_key != self.table_key
+        return super(BGPKeyMapList, self).__ne__(other) or self.table_name != other.table_name or self.table_key != other.table_key
     @staticmethod
     def get_map_field_key(field):
         if type(field) is str:
