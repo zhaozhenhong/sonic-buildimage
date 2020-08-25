@@ -18,7 +18,7 @@ CFGGEN_PARAMS=" \
 "
 if [ -n "$TEMPL_CONFIG" ] && [ "$TEMPL_CONFIG" == "false" ]; then
     CFGGEN_PARAMS+=" \
-        -t /usr/share/sonic/templates/bgdd/bfdd.conf.j2,/etc/frr/bfdd.conf \
+        -t /usr/share/sonic/templates/bfdd/bfdd.conf.j2,/etc/frr/bfdd.conf \
         -t /usr/share/sonic/templates/ospfd/ospfd.conf.j2,/etc/frr/ospfd.conf \
     "
 fi
