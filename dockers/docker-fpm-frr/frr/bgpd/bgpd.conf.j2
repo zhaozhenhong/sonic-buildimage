@@ -18,7 +18,7 @@ agentx
 {%  include "bgpd.spine_chassis_frontend_router.conf.j2" %}
 {% endif %}
 !
-{% if DEVICE_METADATA['localhost'].has_key('bgp_template_config') and DEVICE_METADATA['localhost']['bgp_template_config'] == 'false' %}
+{% if 'frr_mgmt_frameowrk_config' in DEVICE_METADATA['localhost'] and DEVICE_METADATA['localhost']['frr_mgmt_framework_config'] == 'true' %}
 {% include "bgpd.conf.db.j2" %}
 {% else %}
 {% include "bgpd.main.conf.j2" %}

@@ -3,7 +3,7 @@
 mkdir -p /etc/frr
 mkdir -p /etc/supervisor/conf.d
 
-TEMPL_CONFIG=`sonic-cfggen -d -v 'DEVICE_METADATA["localhost"]["bgp_template_config"]'`
+MGMT_FRAMEWORK_CONFIG=`sonic-cfggen -d -v 'DEVICE_METADATA["localhost"]["frr_mgmt_framework_config"]'`
 CFGGEN_PARAMS=" \
     -d \
     -y /etc/sonic/constants.yml \
@@ -16,7 +16,7 @@ CFGGEN_PARAMS=" \
     -t /usr/share/sonic/templates/isolate.j2,/usr/sbin/bgp-isolate \
     -t /usr/share/sonic/templates/unisolate.j2,/usr/sbin/bgp-unisolate \
 "
-if [ -n "$TEMPL_CONFIG" ] && [ "$TEMPL_CONFIG" == "false" ]; then
+if [ -n "$MGMT_FRAMEWORK_CONFIG" ] && [ "$MGMT_FRAMEWORK_CONFIG" == "true" ]; then
     CFGGEN_PARAMS+=" \
         -t /usr/share/sonic/templates/bfdd/bfdd.conf.j2,/etc/frr/bfdd.conf \
         -t /usr/share/sonic/templates/ospfd/ospfd.conf.j2,/etc/frr/ospfd.conf \

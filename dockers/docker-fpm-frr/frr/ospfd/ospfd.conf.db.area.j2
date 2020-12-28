@@ -1,37 +1,37 @@
 {% set areaid = areakey[1] %}
-{% if area_instance.has_key('authentication') %}
+{% if 'authentication' in area_instance %}
 {% if area_instance['authentication'] == "MD5HMAC" %}
   area {{ areaid }} authentication message-digest
 {% else %}
   area {{ areaid }} authentication
 {% endif %}
 {% endif %}
-{% if area_instance.has_key('stub-no-summary') %}
+{% if 'stub-no-summary' in area_instance %}
 {% if area_instance['stub-no-summary'] == 'true' %}
   area {{ areaid }} stub no-summary
 {% endif %}
 {% else %}
-{% if area_instance.has_key('stub') %}
+{% if 'stub' in area_instance %}
 {% if area_instance['stub'] == 'true' %}
   area {{ areaid }} stub
 {% endif %}
 {% endif %}
 {% endif %}
-{% if area_instance.has_key('stub-default-cost') %}
+{% if 'stub-default-cost' in area_instance %}
   area {{ areaid }} default-cost {{ area_instance['stub-default-cost'] }}
 {% endif %}
-{% if area_instance.has_key('import-list') %}
+{% if 'import-list' in area_instance %}
   area {{ areaid }} import-list {{ area_instance['import-list'] }}
 {% endif %}
-{% if area_instance.has_key('export-list') %}
+{% if 'export-list' in area_instance %}
   area {{ areaid }} export-list {{ area_instance['export-list'] }}
 {% endif %}
-{% if area_instance.has_key('filter-list-in') %}
+{% if 'filter-list-in' in area_instance %}
   area {{ areaid }} filter-list prefix {{ area_instance['filter-list-in'] }} in
 {% endif %}
-{% if area_instance.has_key('filter-list-out') %}
+{% if 'filter-list-out' in area_instance %}
   area {{ areaid }} filter-list prefix {{ area_instance['filter-list-out'] }} out
 {% endif %}
-{% if area_instance.has_key('shortcut') %}
+{% if 'shortcut' in area_instance %}
   area {{ areaid }} shortcut {{ (area_instance['shortcut']).lower() }}
 {% endif %}

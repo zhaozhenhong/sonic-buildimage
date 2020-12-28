@@ -6,7 +6,7 @@
 {% for md in modes %}
 !
 {% for key, val in PREFIX_SET.items() %}
-{% if val.has_key('mode') %}
+{% if 'mode' in val %}
 {% for pf_key, pf_val in PREFIX.items() %}
 {% if pf_key[0] == key and md == val['mode'] %}
 {% if pf_key[2] == 'exact' %}

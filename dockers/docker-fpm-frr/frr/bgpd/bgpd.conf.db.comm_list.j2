@@ -6,7 +6,7 @@
 {# ------------------------------------------------------------------------------------ #}
 {% if COMMUNITY_SET is defined and COMMUNITY_SET|length > 0 %}
 {% for cm_key, cm_val in COMMUNITY_SET.items() %}
-{% if cm_val.has_key('set_type') and cm_val.has_key('match_action') and cm_val.has_key('community_member') %}
+{% if 'set_type' in cm_val and 'match_action' in cm_val and 'community_member' in cm_val %}
 {% if cm_val['match_action']|lower == 'all' %}
 {% set ns = namespace(cm_list = '') %}
 {% for cm in cm_val['community_member'] %}
@@ -24,7 +24,7 @@ bgp community-list {{cm_val['set_type']|lower}} {{cm_key}} permit {{cm}}
 {# ------------------------------------------------------------------------------------ #}
 {% if EXTENDED_COMMUNITY_SET is defined and EXTENDED_COMMUNITY_SET|length > 0 %}
 {% for cm_key, cm_val in EXTENDED_COMMUNITY_SET.items() %}
-{% if cm_val.has_key('set_type') and cm_val.has_key('match_action') and cm_val.has_key('community_member') %}
+{% if 'set_type' in cm_val and 'match_action' in cm_val and 'community_member' in cm_val %}
 {% if cm_val['match_action']|lower == 'all' %}
 {% set ns = namespace(cm_list = '') %}
 {% for cm in cm_val['community_member'] %}

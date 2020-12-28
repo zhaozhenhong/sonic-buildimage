@@ -12,92 +12,92 @@
 {% endif %}
 {% endif %}
 {% set remote_as = '' %}
-{% if nbr_or_peer.has_key('asn') %}
+{% if 'asn' in nbr_or_peer %}
 {% set remote_as = nbr_or_peer['asn'] %}
 {% endif %}
-{% if nbr_or_peer.has_key('peer_type') %}
+{% if 'peer_type' in nbr_or_peer %}
 {% set remote_as = nbr_or_peer['peer_type'] %}
 {% endif %}
 {% if remote_as != '' %}
  neighbor {{name_or_ip}} {{ns_intf.intf_arg}}remote-as {{remote_as}}
 {% endif %}
-{% if nbr_or_peer.has_key('peer_group_name') %}
+{% if 'peer_group_name' in nbr_or_peer %}
  neighbor {{name_or_ip}} {{ns_intf.intf_arg}}peer-group {{nbr_or_peer['peer_group_name']}}
 {% endif %}
-{% if nbr_or_peer.has_key('local_asn') %}
+{% if 'local_asn' in nbr_or_peer %}
  neighbor {{name_or_ip}} local-as {{nbr_or_peer['local_asn']}}
 {% endif %}
-{% if nbr_or_peer.has_key('name') %}
+{% if 'name' in nbr_or_peer %}
  neighbor {{name_or_ip}} description {{nbr_or_peer['name']}}
 {% endif %}
-{% if nbr_or_peer.has_key('admin_status') and nbr_or_peer['admin_status'] == 'false' %}
-{% if nbr_or_peer.has_key('shutdown_message') %}
+{% if 'admin_status' in nbr_or_peer and nbr_or_peer['admin_status'] == 'false' %}
+{% if 'shutdown_message' in nbr_or_peer %}
  neighbor {{name_or_ip}} shutdown message {{nbr_or_peer['shutdown_message']}}
 {% else %}
  neighbor {{name_or_ip}} shutdown
 {% endif %}
 {% endif %}
-{% if nbr_or_peer.has_key('bfd') and nbr_or_peer['bfd'] == 'true' %}
+{% if 'bfd' in nbr_or_peer and nbr_or_peer['bfd'] == 'true' %}
  neighbor {{name_or_ip}} bfd
 {% endif %}
-{% if nbr_or_peer.has_key('ttl_security_hops') %}
+{% if 'ttl_security_hops' in nbr_or_peer %}
  neighbor {{name_or_ip}} ttl-security hops {{nbr_or_peer['ttl_security_hops']}}
 {% endif %}
-{% if nbr_or_peer.has_key('auth_password') %}
+{% if 'auth_password' in nbr_or_peer %}
  neighbor {{name_or_ip}} password {{nbr_or_peer['auth_password']}} encrypted
 {% endif %}
-{% if nbr_or_peer.has_key('solo_peer') and nbr_or_peer['solo_peer'] == 'true' %}
+{% if 'solo_peer' in nbr_or_peer and nbr_or_peer['solo_peer'] == 'true' %}
  neighbor {{name_or_ip}} solo
 {% endif %}
-{% if nbr_or_peer.has_key('peer_port') %}
+{% if 'peer_port' in nbr_or_peer %}
  neighbor {{name_or_ip}} port {{nbr_or_peer['peer_port']}}
 {% endif %}
-{% if nbr_or_peer.has_key('passive_mode') and nbr_or_peer['passive_mode'] == 'true' %}
+{% if 'passive_mode' in nbr_or_peer and nbr_or_peer['passive_mode'] == 'true' %}
  neighbor {{name_or_ip}} passive
 {% endif %}
 {% set mhop = '' %}
-{% if nbr_or_peer.has_key('ebgp_multihop') and nbr_or_peer['ebgp_multihop'] == 'true' %}
+{% if 'ebgp_multihop' in nbr_or_peer and nbr_or_peer['ebgp_multihop'] == 'true' %}
 {% set mhop = 255 %}
 {% endif %}
-{% if nbr_or_peer.has_key('ebgp_multihop_ttl') %}
+{% if 'ebgp_multihop_ttl' in nbr_or_peer %}
 {% set mhop = nbr_or_peer['ebgp_multihop_ttl']  %}
 {% endif %}
 {% if mhop != '' %}
  neighbor {{name_or_ip}} ebgp-multihop {{mhop}}
 {% endif %}
-{% if nbr_or_peer.has_key('disable_ebgp_connected_route_check') and nbr_or_peer['disable_ebgp_connected_route_check'] == 'true' %}
+{% if 'disable_ebgp_connected_route_check' in nbr_or_peer and nbr_or_peer['disable_ebgp_connected_route_check'] == 'true' %}
  neighbor {{name_or_ip}} disable-connected-check
 {% endif %}
-{% if nbr_or_peer.has_key('enforce_first_as') and nbr_or_peer['enforce_first_as'] == 'true' %}
+{% if 'enforce_first_as' in nbr_or_peer and nbr_or_peer['enforce_first_as'] == 'true' %}
  neighbor {{name_or_ip}} enforce-first-as
 {% endif %}
-{% if nbr_or_peer.has_key('local_addr') %}
+{% if 'local_addr' in nbr_or_peer %}
  neighbor {{name_or_ip}} update-source {{nbr_or_peer['local_addr']}}
 {% endif %}
-{% if nbr_or_peer.has_key('strict_capability_match') and nbr_or_peer['strict_capability_match'] == true %}
+{% if 'strict_capability_match' in nbr_or_peer and nbr_or_peer['strict_capability_match'] == true %}
  neighbor {{name_or_ip}} strict-capability-match {{nbr_or_peer['strict_capability_match']}}
 {% endif %}
-{% if nbr_or_peer.has_key('min_adv_interval') %}
+{% if 'min_adv_interval' in nbr_or_peer %}
  neighbor {{name_or_ip}} advertisement-interval {{nbr_or_peer['min_adv_interval']}}
 {% endif %}
-{% if nbr_or_peer.has_key('keepalive') and nbr_or_peer.has_key('holdtime') %}
+{% if 'keepalive' in nbr_or_peer and 'holdtime' in nbr_or_peer %}
  neighbor {{name_or_ip}} timers {{nbr_or_peer['keepalive']}} {{nbr_or_peer['holdtime']}}
 {% endif %}
-{% if nbr_or_peer.has_key('conn_retry') %}
+{% if 'conn_retry' in nbr_or_peer %}
  neighbor {{name_or_ip}} timers connect {{nbr_or_peer['conn_retry']}}
 {% endif %}
-{% if nbr_or_peer.has_key('capability_dynamic') and nbr_or_peer['capability_dynamic'] == 'true' %}
+{% if 'capability_dynamic' in nbr_or_peer and nbr_or_peer['capability_dynamic'] == 'true' %}
  neighbor {{name_or_ip}} capability dynamic
 {% endif %}
-{% if nbr_or_peer.has_key('capability_ext_nexthop') and nbr_or_peer['capability_ext_nexthop'] == 'true' %}
+{% if 'capability_ext_nexthop' in nbr_or_peer and nbr_or_peer['capability_ext_nexthop'] == 'true' %}
  neighbor {{name_or_ip}} capability extended-nexthop
 {% endif %}
-{% if nbr_or_peer.has_key('dont_negotiate_capability') and nbr_or_peer['dont_negotiate_capability'] == 'true' %}
+{% if 'dont_negotiate_capability' in nbr_or_peer and nbr_or_peer['dont_negotiate_capability'] == 'true' %}
  neighbor {{name_or_ip}} dont-capability-negotiate
 {% endif %}
-{% if nbr_or_peer.has_key('enforce_multihop') and nbr_or_peer['enforce_multihop'] == 'true' %}
+{% if 'enforce_multihop' in nbr_or_peer and nbr_or_peer['enforce_multihop'] == 'true' %}
  neighbor {{name_or_ip}} enforce-multihop
 {% endif %}
-{% if nbr_or_peer.has_key('override_capability') and nbr_or_peer['override_capability'] == 'true' %}
+{% if 'override_capability' in nbr_or_peer and nbr_or_peer['override_capability'] == 'true' %}
  neighbor {{name_or_ip}} override-capability
 {% endif %}

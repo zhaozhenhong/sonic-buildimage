@@ -4,20 +4,20 @@
 {% if routeproto == "DEFAULT_ROUTE" and routedirection == "IMPORT"  %}
 {% set defaultinfo_cmd = '' %}
 {% set defaultinfo_cmd = 'default-information originate' %}
-{% if route_instance.has_key('always') %}
+{% if 'always' in route_instance %}
 {% if route_instance['always'] == 'true' %}
 {% set defaultinfo_cmd = defaultinfo_cmd + ' always' %}
 {% endif %}
 {% endif %}
-{% if route_instance.has_key('metric') %}
+{% if 'metric' in route_instance %}
 {% set defaultinfo_cmd = defaultinfo_cmd + ' metric ' + route_instance['metric'] %}
 {% endif %}
-{% if route_instance.has_key('metric-type') %}
+{% if 'metric-type' in route_instance %}
 {% if route_instance['metric-type'] == "TYPE_1"%}
 {% set defaultinfo_cmd = defaultinfo_cmd + ' metric-type ' + '1' %}
 {% endif %}
 {% endif %}
-{% if route_instance.has_key('route-map') %}
+{% if 'route-map' in route_instance %}
 {% set defaultinfo_cmd = defaultinfo_cmd + ' route-map ' + route_instance['route-map'] %}
 {% endif %}
  {{ defaultinfo_cmd }}
@@ -28,20 +28,20 @@
 {% else %}
 {% set redistribute_cmd = 'redistribute ' + routeproto.lower() %}
 {% endif %}
-{% if route_instance.has_key('metric') %}
+{% if 'metric' in route_instance %}
 {% set redistribute_cmd = redistribute_cmd + ' metric ' + route_instance['metric'] %}
 {% endif %}
-{% if route_instance.has_key('metric-type') %}
+{% if 'metric-type' in route_instance %}
 {% if route_instance['metric-type'] == "TYPE_1"%}
 {% set redistribute_cmd = redistribute_cmd + ' metric-type ' + '1' %}
 {% endif %}
 {% endif %}
-{% if route_instance.has_key('route-map') %}
+{% if 'route-map' in route_instance %}
 {% set redistribute_cmd = redistribute_cmd + ' route-map ' + route_instance['route-map'] %}
 {% endif %}
  {{ redistribute_cmd }}
 {% elif routedirection == "EXPORT" and routeproto in generic_protocols %}
-{% if route_instance.has_key('route-map') %}
+{% if 'route-map' in route_instance %}
 {% if routeproto == "DIRECTLY_CONNECTED" %}
  distribute-list {{ route_instance['route-map'] }} out connected
 {% else %}

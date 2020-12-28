@@ -54,7 +54,7 @@
                 {#- ------------------------------ parse nh - start ------------------------------ #}
                 {%- set nh = namespace(blackhole = False, ip = None, intf = None, dist = None, tag = None, vrf = None) %}
                 {#- ------------------------------ nexthop blackhole ------------------------------ #}
-                {%- if nh_attr.has_key('blackhole') %}
+                {%- if 'blackhole' in nh_attr %}
                     {%- set nh.blackhole = nh_attr['blackhole'][nh_idx] %}
                     {%- if nh.blackhole == 'true' %}
                         {%- set nh.blackhole = True %}
@@ -63,28 +63,28 @@
                     {%- endif %}
                 {%- endif %}
                 {#- ------------------------------ nexthop IP ------------------------------ #}
-                {%- if nh_attr.has_key('nexthop') %}
+                {%- if 'nexthop' in nh_attr %}
                     {%- set nh.ip = nh_attr['nexthop'][nh_idx] %}
                     {%- if nh.ip == '0.0.0.0' or nh.ip == '::' %}
                         {%- set nh.ip = None %}
                     {%- endif %}
                 {%- endif %}
                 {#- ------------------------------ nexthop interface ------------------------------ #}
-                {%- if nh_attr.has_key('ifname') %}
+                {%- if 'ifname' in nh_attr %}
                     {%- set nh.intf = nh_attr['ifname'][nh_idx] %}
                     {%- if nh.intf == '' %}
                         {%- set nh.intf = None %}
                     {%- endif %}
                 {%- endif %}
                 {#- ------------------------------ nexthop distance ------------------------------ #}
-                {%- if nh_attr.has_key('distance') %}
+                {%- if 'distance' in nh_attr %}
                     {%- set nh.dist = nh_attr['distance'][nh_idx] %}
                     {%- if nh.dist == '0' %}
                         {%- set nh.dist = None %}
                     {%- endif %}
                 {%- endif %}
                 {#- ------------------------------ nexthop tag ------------------------------ #}
-                {%- if nh_attr.has_key('tag') %}
+                {%- if 'tag' in nh_attr %}
                     {%- set nh.tag = nh_attr['tag'][nh_idx] %}
                     {%- if nh.tag == '0' %}
                         {%- set nh.tag = None %}
@@ -94,7 +94,7 @@
                     {%- endif %}
                 {%- endif %}
                 {#- ------------------------------ nexthop VRF ------------------------------ #}
-                {%- if nh_attr.has_key('nexthop-vrf') %}
+                {%- if 'nexthop-vrf' in nh_attr %}
                     {%- set nh.vrf = nh_attr['nexthop-vrf'][nh_idx] %}
                     {%- if nh.vrf == '' %}
                         {%- set nh.vrf = None %}
@@ -110,7 +110,7 @@
                 {%- endif %}
             {%- endfor %}
             {#- ------------------------------ for each route - end ------------------------------ #}
-            {%- if not vrf_rt_list.has_key(rt.vrf) %}
+            {%- if not rt.vrf in vrf_rt_list %}
                 {%- if vrf_rt_list.update({rt.vrf: []}) %}
                 {%- endif %}
             {%- endif %}
