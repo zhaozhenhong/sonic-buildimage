@@ -8,5 +8,13 @@
 !
 {% include "common/daemons.common.conf.j2" %}
 !
+{% if MGMT_VRF_CONFIG %}
+{% if MGMT_VRF_CONFIG['vrf_global']['mgmtVrfEnabled'] == 'false' %}
 {% include "staticd.default_route.conf.j2" %}
+{% endif %}
+{% else %}
+{% include "staticd.default_route.conf.j2" %}
+{% endif %}
+!
+{% include "staticd.db.conf.j2" %}
 !

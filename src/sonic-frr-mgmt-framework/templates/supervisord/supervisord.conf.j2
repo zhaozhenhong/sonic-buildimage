@@ -50,8 +50,44 @@ stderr_logfile=syslog
 dependent_startup=true
 dependent_startup_wait_for=zebra:running
 
+[program:bfdd]
+command=/usr/lib/frr/bfdd -A 127.0.0.1
+priority=4
+stopsignal=KILL
+autostart=false
+autorestart=false
+startsecs=0
+stdout_logfile=syslog
+stderr_logfile=syslog
+dependent_startup=true
+dependent_startup_wait_for=zebra:running
+
 [program:bgpd]
 command=/usr/lib/frr/bgpd -A 127.0.0.1 -M snmp
+priority=5
+stopsignal=KILL
+autostart=false
+autorestart=false
+startsecs=0
+stdout_logfile=syslog
+stderr_logfile=syslog
+dependent_startup=true
+dependent_startup_wait_for=zebra:running
+
+[program:ospfd]
+command=/usr/lib/frr/ospfd -A 127.0.0.1 -M snmp
+priority=5
+stopsignal=KILL
+autostart=false
+autorestart=false
+startsecs=0
+stdout_logfile=syslog
+stderr_logfile=syslog
+dependent_startup=true
+dependent_startup_wait_for=zebra:running
+
+[program:pimd]
+command=/usr/lib/frr/pimd -A 127.0.0.1
 priority=5
 stopsignal=KILL
 autostart=false
@@ -73,22 +109,11 @@ stderr_logfile=syslog
 dependent_startup=true
 dependent_startup_wait_for=bgpd:running
 
-[program:bgpcfgd]
-command=/usr/local/bin/bgpcfgd
+[program:frrcfgd]
+command=/usr/local/bin/frrcfgd
 priority=6
 autostart=false
 autorestart=false
-startsecs=0
-stdout_logfile=syslog
-stderr_logfile=syslog
-dependent_startup=true
-dependent_startup_wait_for=bgpd:running
-
-[program:bgpmon]
-command=/usr/local/bin/bgpmon
-priority=6
-autostart=false
-autorestart=true
 startsecs=0
 stdout_logfile=syslog
 stderr_logfile=syslog

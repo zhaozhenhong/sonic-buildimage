@@ -8,12 +8,12 @@ import os
 from swsssdk import ConfigDBConnector
 import socket
 import threading
-import Queue
+import queue
 import signal
 import re
 import logging
 import netaddr
-import cStringIO
+import io
 import struct
 
 class CachedDataWithOp:
@@ -148,11 +148,11 @@ class BgpdClientMgr(threading.Thread):
     def __get_reply(sock):
         reply_msg = None
         ret_code = None
-        msg_buf = cStringIO.StringIO()
+        msg_buf = io.StringIO()
         while True:
             try:
                 rd_msg = sock.recv(16384)
-                msg_buf.write(rd_msg)
+                msg_buf.write(rd_msg.decode())
             except socket.timeout:
                 syslog.syslog(syslog.LOG_ERR, 'socket reading timeout')
                 break
@@ -161,8 +161,10 @@ class BgpdClientMgr(threading.Thread):
                 if len(rd_msg) < 4:
                     continue
             msg_tail = rd_msg[-4:]
-            if msg_tail[0] == '\0' and msg_tail[1] == '\0' and msg_tail[2] == '\0':
-                ret_code = ord(msg_tail[3])
+            if isinstance(msg_tail, str):
+                msg_tail = bytes(msg_tail, 'utf-8')
+            if msg_tail[0] == 0 and msg_tail[1] == 0 and msg_tail[2] == 0:
+                ret_code = msg_tail[3]
                 reply_msg = msg_buf.getvalue()[:-4]
                 break
         msg_buf.close()
@@ -177,7 +179,7 @@ class BgpdClientMgr(threading.Thread):
                 try:
                     sock.connect(serv_addr)
                     break
-                except socket.error, msg:
+                except socket.error as msg:
                     syslog.syslog(syslog.LOG_ERR, 'failed to connect to frr daemon %s: %s' % (daemon, msg))
                     retry_cnt += 1
                     if retry_cnt > 100 or not main_loop:
@@ -192,13 +194,13 @@ class BgpdClientMgr(threading.Thread):
         for daemon, sock in self.client_socks.items():
             syslog.syslog(syslog.LOG_DEBUG, 'send initial enable command to %s' % daemon)
             try:
-                sock.sendall('enable\0')
-            except socket.error, msg:
+                sock.sendall(bytes('enable\0', 'utf-8'))
+            except socket.error as msg:
                 syslog.syslog(syslog.LOG_ERR, 'failed to send initial enable command to %s' % daemon)
                 return False
             ret_code, reply = self.__get_reply(sock)
             if ret_code is None:
-                syslog.syslog(syslog.LOG_ERR, 'failed to command response for enable command')
+                syslog.syslog(syslog.LOG_ERR, 'failed to get command response for enable command from %s' % daemon)
                 return False
             if ret_code != 0:
                 syslog.syslog(syslog.LOG_ERR, 'enable command failed: ret_code=%d' % ret_code)
@@ -249,7 +251,7 @@ class BgpdClientMgr(threading.Thread):
                 continue
             try:
                 sock.sendall(command + '\0')
-            except socket.error, msg:
+            except socket.error as msg:
                 syslog.syslog(syslog.LOG_ERR, 'failed to send command to frr daemon: %s' % msg)
                 return (False, None)
             ret_code, reply = self.__get_reply(sock)
@@ -288,7 +290,7 @@ class BgpdClientMgr(threading.Thread):
         return ret_val
     @staticmethod
     def __read_all(sock, data_len):
-        in_buf = cStringIO.StringIO()
+        in_buf = io.StringIO()
         left_len = data_len
         while left_len > 0:
             data = sock.recv(left_len)
@@ -342,7 +344,7 @@ class BgpdClientMgr(threading.Thread):
                         syslog.syslog(syslog.LOG_ERR, 'read data of length %d is not expected length %d' % (data_len, len(in_cmd)))
                 else:
                     syslog.syslog(syslog.LOG_ERR, 'invalid data length %d' % len(data))
-            except socket.error, msg:
+            except socket.error as msg:
                 syslog.syslog(syslog.LOG_ERR, 'socket writing failed: %s' % msg)
             finally:
                 syslog.syslog(syslog.LOG_DEBUG, 'closing data socket from client')
@@ -1435,10 +1437,10 @@ class ExtConfigDBConnector(ConfigDBConnector):
     def __init__(self, ns_attrs = None):
         super(ExtConfigDBConnector, self).__init__()
         self.nosort_attrs = ns_attrs if ns_attrs is not None else {}
-    def __raw_to_typed(self, table, raw_data):
+    def raw_to_typed(self, table, raw_data):
         if len(raw_data) == 0:
             raw_data = None
-        data = super(ExtConfigDBConnector, self)._ConfigDBConnector__raw_to_typed(raw_data)
+        data = super(ExtConfigDBConnector, self).raw_to_typed(raw_data)
         if data is None:
             return None
         for key, val in data.items():
@@ -1450,9 +1452,9 @@ class ExtConfigDBConnector(ConfigDBConnector):
             key = msg_item['channel'].split(':', 1)[1]
             try:
                 (table, row) = key.split(self.TABLE_NAME_SEPARATOR, 1)
-                if self.handlers.has_key(table):
+                if table in self.handlers:
                     client = self.get_redis_client(self.db_name)
-                    data = self.__raw_to_typed(table, client.hgetall(key))
+                    data = self.raw_to_typed(table, client.hgetall(key))
                     super(ExtConfigDBConnector, self)._ConfigDBConnector__fire(table, row, data)
             except ValueError:
                 pass    #Ignore non table-formated redis entries
@@ -2217,7 +2219,7 @@ class BGPConfigDaemon:
             ('IGMP_INTERFACE', self.bgp_table_handler_common),
             ('IGMP_INTERFACE_QUERY', self.bgp_table_handler_common)
         ]
-        self.bgp_message = Queue.Queue(0)
+        self.bgp_message = queue.Queue(0)
         self.table_data_cache = self.config_db.get_table_data([tbl for tbl, _ in self.table_handler_list])
         syslog.syslog(syslog.LOG_DEBUG, 'Init Cached DB data')
         for key, entry in self.table_data_cache.items():
@@ -2261,7 +2263,7 @@ class BGPConfigDaemon:
         cmd = 'peer {}'.format(key_params[0])
         if len(key_params) == 4 and key_params[3] == 'multihop':
             cmd = cmd + ' multihop '
-       	if key_params[1] != 'null':
+        if key_params[1] != 'null':
             cmd = cmd + ' local-address ' + key_params[1]
         if key_params[2] != 'null':
             cmd = cmd + ' interface ' + key_params[2]
@@ -3017,29 +3019,29 @@ class BGPConfigDaemon:
                             self.af_aggr_list[vrf].pop(norm_ip_prefix, None)
 
             elif table == 'BFD_PEER_SINGLE_HOP':
-		key = prefix + '|' + key
+                key = prefix + '|' + key
                 remoteaddr, interface, vrf, localaddr = key.split('|')
-		if not del_table:
-		    if not 'null' in localaddr:
+                if not del_table:
+                    if not 'null' in localaddr:
                         syslog.syslog(syslog.LOG_INFO, 'Set BFD single hop peer {} {} {} {}'.format(remoteaddr, vrf, interface, localaddr))
 
                         suffix_cmd, oper = self.__bfd_handle_delete (data)
                         if suffix_cmd and oper == CachedDataWithOp.OP_DELETE:
                             command = "vtysh -c 'configure terminal' -c 'bfd' -c 'peer {} local-address {} vrf {} interface {}' -c '{}'".\
                             format(remoteaddr, localaddr, vrf, interface, suffix_cmd)
-			    
+
                             if not self.__run_command(table, command):
-				syslog.syslog(syslog.LOG_ERR, 'failed to delete single-hop peer {}'.format(key))
-                        	continue
+                                syslog.syslog(syslog.LOG_ERR, 'failed to delete single-hop peer {}'.format(key))
+                                continue
                         else:
                             cmd_prefix = ['configure terminal',
                                           'bfd',
                                           'peer {} local-address {} vrf {} interface {}'.format(remoteaddr, localaddr, vrf, interface)]
                             if not key_map.run_command(self, table, data, cmd_prefix):
-                        	syslog.syslog(syslog.LOG_ERR, 'failed running BFD single-hop config command')
-                        	continue
+                                syslog.syslog(syslog.LOG_ERR, 'failed running BFD single-hop config command')
+                                continue
 
-		    else:
+                    else:
                         syslog.syslog(syslog.LOG_INFO, 'Set BFD single hop peer {} {} {}'.format(remoteaddr, vrf, interface))
 
                         suffix_cmd, oper = self.__bfd_handle_delete (data)
@@ -3051,22 +3053,22 @@ class BGPConfigDaemon:
                             if not self.__run_command(table, command):
                                 syslog.syslog(syslog.LOG_ERR, 'failed to delete single-hop peer {}'.format(key))
                                 continue
-			else:
-			    syslog.syslog(syslog.LOG_INFO, 'Set BFD single hop peer {} {} {}'.format(remoteaddr, vrf, interface))
+                        else:
+                            syslog.syslog(syslog.LOG_INFO, 'Set BFD single hop peer {} {} {}'.format(remoteaddr, vrf, interface))
                             cmd_prefix = ['configure terminal',
                                           'bfd',
                                           'peer {} vrf {} interface {}'.format(remoteaddr, vrf, interface)]
                             if not key_map.run_command(self, table, data, cmd_prefix):
                                 syslog.syslog(syslog.LOG_ERR, 'failed running BFD single-hop config command')
                                 continue
-		else:
-		    if 'local-address' in data:
+                else:
+                    if 'local-address' in data:
                         dval = data['local-address']
                         localaddr = dval.data
-		        syslog.syslog(syslog.LOG_INFO, 'Delete BFD single hop to {} {} {}'.format(remoteaddr, vrf, interface, localaddr))
+                        syslog.syslog(syslog.LOG_INFO, 'Delete BFD single hop to {} {} {}'.format(remoteaddr, vrf, interface, localaddr))
                         command = "vtysh -c 'configure terminal' -c 'bfd' -c 'no peer {} local-address {} vrf {} interface {}'".\
                             format(remoteaddr, localaddr, vrf, interface)
-		    else:
+                    else:
                         syslog.syslog(syslog.LOG_INFO, 'Delete BFD single hop to {} {} {}'.format(remoteaddr, vrf, interface))
                         command = "vtysh -c 'configure terminal' -c 'bfd' -c 'no peer {} vrf {} interface {}'".\
                             format(remoteaddr, vrf, interface)
@@ -3075,13 +3077,13 @@ class BGPConfigDaemon:
                         continue
                     self.__delete_bfd_peer(data)
             elif table == 'BFD_PEER_MULTI_HOP':
-		key = prefix + '|' + key
+                key = prefix + '|' + key
                 remoteaddr, interface, vrf, localaddr = key.split('|')
                 if not del_table:
-		    syslog.syslog(syslog.LOG_INFO, 'Set BFD multi hop to {} {} {} {}'.format(remoteaddr, interface, vrf, localaddr))
+                    syslog.syslog(syslog.LOG_INFO, 'Set BFD multi hop to {} {} {} {}'.format(remoteaddr, interface, vrf, localaddr))
                     suffix_cmd, oper = self.__bfd_handle_delete (data)
                     if suffix_cmd and oper == CachedDataWithOp.OP_DELETE:
-			if not 'null' in interface:
+                        if not 'null' in interface:
                             command = "vtysh -c 'configure terminal' -c 'bfd' -c 'peer {} local-address {} vrf {} interface {}' -c '{}'".\
                             format(remoteaddr, localaddr, vrf, interface, suffix_cmd)
                         else:
@@ -3091,11 +3093,11 @@ class BGPConfigDaemon:
                         if not self.__run_command(table, command):
                             syslog.syslog(syslog.LOG_ERR, 'failed to delete single-hop peer {}'.format(key))
                             continue
-		    else:
+                    else:
                         if not 'null' in interface:
                             cmd_prefix = ['configure terminal',
                                           'bfd',
-                              	          'peer {} vrf {} multihop local-address {} interface {}'.format(remoteaddr, vrf, localaddr, interface)]
+                                                'peer {} vrf {} multihop local-address {} interface {}'.format(remoteaddr, vrf, localaddr, interface)]
                         else:
                             cmd_prefix = ['configure terminal',
                                           'bfd',
@@ -3104,7 +3106,7 @@ class BGPConfigDaemon:
                         if not key_map.run_command(self, table, data, cmd_prefix):
                             syslog.syslog(syslog.LOG_ERR, 'failed running BFD multi-hop config command')
                             continue
-		else:
+                else:
                     syslog.syslog(syslog.LOG_INFO, 'Delete BFD multi hop to {} {} {} {}'.format(remoteaddr, vrf, localaddr, interface))
                     if not 'null' in interface:
                         command = "vtysh -c 'configure terminal' -c 'bfd' -c 'no peer {} vrf {} multihop local-address {} interface {}'".\
@@ -3116,7 +3118,7 @@ class BGPConfigDaemon:
                     if not self.__run_command(table, command):
                         syslog.syslog(syslog.LOG_ERR, 'failed to delete multihop peer {}'.format(key))
                         continue
-		    self.__delete_bfd_peer(data)
+                    self.__delete_bfd_peer(data)
             elif table == 'IP_SLA':
                 sla_id = prefix
                 icmp_config = False
@@ -3454,7 +3456,7 @@ class BGPConfigDaemon:
                         if (command != ""):
                             if not self.__run_command(table, command):
                                 syslog.syslog(syslog.LOG_ERR, 'failed to delete default-info/redistribute {}'.format(protocol.lower()))
-                                continue		
+                                continue
                             else:
                                 self.__ospf_delete(data)
                     else:
@@ -3464,7 +3466,7 @@ class BGPConfigDaemon:
 
                             if not self.__run_command(table, command):
                                 syslog.syslog(syslog.LOG_ERR, 'failed to delete distribute-list {} {}'.format(protocol, direction))
-                                continue	
+                                continue
                             
                         self.__ospf_delete(data)
  
