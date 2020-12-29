@@ -29,7 +29,6 @@ setuptools.setup(
     data_files = [('frr/common', ['templates/common/daemons.common.conf.j2']),
                   ('frr/bgpd', ['templates/bgpd/bgpd.conf.db.j2',
                                 'templates/bgpd/bgpd.spine_chassis_frontend_router.conf.j2',
-                                'templates/bgpd/bgpd.main.conf.j2',
                                 'templates/bgpd/bgpd.conf.j2',
                                 'templates/bgpd/bgpd.conf.db.route_map.j2',
                                 'templates/bgpd/bgpd.conf.db.pref_list.j2',
