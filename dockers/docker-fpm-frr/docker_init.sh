@@ -4,6 +4,7 @@ mkdir -p /etc/frr
 mkdir -p /etc/supervisor/conf.d
 
 MGMT_FRAMEWORK_CONFIG=`sonic-cfggen -d -v 'DEVICE_METADATA["localhost"]["frr_mgmt_framework_config"]'`
+CRIT_PROC_BACKUP="/usr/local/frr/supervisord/critical_processes.bak"
 if [ -n "$MGMT_FRAMEWORK_CONFIG" ] && [ "$MGMT_FRAMEWORK_CONFIG" == "true" ]; then
     CFGGEN_PARAMS=" \
         -d \
@@ -19,6 +20,11 @@ if [ -n "$MGMT_FRAMEWORK_CONFIG" ] && [ "$MGMT_FRAMEWORK_CONFIG" == "true" ]; th
         -t /usr/local/frr/bfdd/bfdd.conf.j2,/etc/frr/bfdd.conf \
         -t /usr/local/frr/ospfd/ospfd.conf.j2,/etc/frr/ospfd.conf \
     "
+    if [ ! -f $CRIT_PROC_BACKUP ]; then
+        mv /etc/supervisor/critical_processes $CRIT_PROC_BACKUP
+    fi
+    # change critical process list with those of enterprise release
+    cp /usr/local/frr/supervisord/critical_processes /etc/supervisor
 else
     CFGGEN_PARAMS=" \
         -d \
@@ -32,6 +38,10 @@ else
         -t /usr/share/sonic/templates/isolate.j2,/usr/sbin/bgp-isolate \
         -t /usr/share/sonic/templates/unisolate.j2,/usr/sbin/bgp-unisolate \
     "
+    if [ -f $CRIT_PROC_BACKUP ]; then
+        # restore original critical process list for community release
+        mv -f $CRIT_PROC_BACKUP /etc/supervisor/critical_processes
+    fi
 fi
 CONFIG_TYPE=$(sonic-cfggen $CFGGEN_PARAMS)
 

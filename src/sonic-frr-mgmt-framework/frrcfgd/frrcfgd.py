@@ -169,6 +169,11 @@ class BgpdClientMgr(threading.Thread):
                 break
         msg_buf.close()
         return (ret_code, reply_msg)
+    @staticmethod
+    def __send_data(sock, data):
+        if isinstance(data, str):
+            data = bytes(data, 'utf-8')
+        sock.sendall(data)
     def __create_frr_client(self):
         self.client_socks = {}
         for daemon in self.ALL_DAEMONS:
@@ -194,7 +199,7 @@ class BgpdClientMgr(threading.Thread):
         for daemon, sock in self.client_socks.items():
             syslog.syslog(syslog.LOG_DEBUG, 'send initial enable command to %s' % daemon)
             try:
-                sock.sendall(bytes('enable\0', 'utf-8'))
+                self.__send_data(sock, 'enable\0')
             except socket.error as msg:
                 syslog.syslog(syslog.LOG_ERR, 'failed to send initial enable command to %s' % daemon)
                 return False
@@ -250,7 +255,7 @@ class BgpdClientMgr(threading.Thread):
                 syslog.syslog(syslog.LOG_ERR, 'daemon %s is not connected' % daemon)
                 continue
             try:
-                sock.sendall(command + '\0')
+                self.__send_data(sock, command + '\0')
             except socket.error as msg:
                 syslog.syslog(syslog.LOG_ERR, 'failed to send command to frr daemon: %s' % msg)
                 return (False, None)
@@ -284,7 +289,7 @@ class BgpdClientMgr(threading.Thread):
         ret_val = True
         with self.lock:
             for cmd in cmd_list:
-                succ, reply = self.__proc_command(cmd.strip(), daemons)
+                succ, _ = self.__proc_command(cmd.strip(), daemons)
                 if not succ:
                     ret_val = False
         return ret_val
@@ -335,7 +340,7 @@ class BgpdClientMgr(threading.Thread):
                                 for line in in_lines:
                                     _, reply = self.__proc_command(line.strip(), daemons)
                                     if reply is not None:
-                                        conn_sock.sendall(reply)
+                                        self.__send_data(conn_sock, reply)
                                     else:
                                         syslog.syslog(syslog.LOG_ERR, 'failed running VTYSH command')
                         else:
@@ -1437,7 +1442,7 @@ class ExtConfigDBConnector(ConfigDBConnector):
     def __init__(self, ns_attrs = None):
         super(ExtConfigDBConnector, self).__init__()
         self.nosort_attrs = ns_attrs if ns_attrs is not None else {}
-    def raw_to_typed(self, table, raw_data):
+    def raw_to_typed(self, raw_data, table = ''):
         if len(raw_data) == 0:
             raw_data = None
         data = super(ExtConfigDBConnector, self).raw_to_typed(raw_data)
@@ -1454,7 +1459,7 @@ class ExtConfigDBConnector(ConfigDBConnector):
                 (table, row) = key.split(self.TABLE_NAME_SEPARATOR, 1)
                 if table in self.handlers:
                     client = self.get_redis_client(self.db_name)
-                    data = self.raw_to_typed(table, client.hgetall(key))
+                    data = self.raw_to_typed(client.hgetall(key), table)
                     super(ExtConfigDBConnector, self)._ConfigDBConnector__fire(table, row, data)
             except ValueError:
                 pass    #Ignore non table-formated redis entries
@@ -2419,11 +2424,11 @@ class BGPConfigDaemon:
             entry_list = self.config_db.get_table(table_name)
         match_fn = extra_args.get('match', None)
         for key, data in entry_list.items():
-            if len(key) == 0 or key[0] != vrf:
+            if data is None or len(key) == 0 or key[0] != vrf:
                 continue
             if match_fn is not None and not match_fn(data):
                 continue
-            syslog.syslog(syslog.LOG_DEBUG, 'attr re-apply for vrf {} table {} key {}'.format(vrf, table_name, key))
+            syslog.syslog(syslog.LOG_DEBUG, 'attr re-apply for vrf {} table {} key {} data {}'.format(vrf, table_name, key, data))
             upd_data = {}
             for upd_key, upd_val in data.items():
                 upd_data[upd_key] = CachedDataWithOp(upd_val, CachedDataWithOp.OP_ADD)
