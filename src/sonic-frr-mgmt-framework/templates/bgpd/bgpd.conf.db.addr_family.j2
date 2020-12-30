@@ -14,7 +14,7 @@
  !
  address-family {{af_str}} {{safi_str_map[af]}}
 {% if BGP_GLOBALS_AF is defined and BGP_GLOBALS_AF|length > 0 %}
-{% for af_key, af_val in BGP_GLOBALS_AF.iteritems() %}
+{% for af_key, af_val in BGP_GLOBALS_AF.items() %}
 {% if vrf == af_key[0] and af == af_key[1] %}
 {% if 'ebgp_route_distance' in af_val and 'ibgp_route_distance' in af_val and 'local_route_distance' in af_val %}
   distance bgp {{af_val['ebgp_route_distance']}} {{af_val['ibgp_route_distance']}} {{af_val['local_route_distance']}}
@@ -30,7 +30,7 @@
 {% endif %}
 {# ------- network-prefix    --------------------------- #}
 {% if BGP_GLOBALS_AF_NETWORK is defined and BGP_GLOBALS_AF_NETWORK|length > 0 %}
-{% for af_nw_key, af_nw_val in BGP_GLOBALS_AF_NETWORK.iteritems() %}
+{% for af_nw_key, af_nw_val in BGP_GLOBALS_AF_NETWORK.items() %}
 {% if vrf == af_nw_key[0] and af == af_nw_key[1] %}
 {% set af_nw_ns = namespace(nw_end = '') %}
 {% if 'backdoor' in af_nw_val and af_nw_val['backdoor'] == 'true' %}
@@ -46,7 +46,7 @@
 {# ------- network-prefix end   --------------------------- #}
 {# ------- aggregate-prefix -Start--------------------------- #}
 {% if BGP_GLOBALS_AF_AGGREGATE_ADDR is defined and BGP_GLOBALS_AF_AGGREGATE_ADDR|length > 0 %}
-{% for af_ag_key, af_ag_val in BGP_GLOBALS_AF_AGGREGATE_ADDR.iteritems() %}
+{% for af_ag_key, af_ag_val in BGP_GLOBALS_AF_AGGREGATE_ADDR.items() %}
 {% set af_ag_ns = namespace(ag_end = '') %}
 {% if vrf == af_ag_key[0] and af == af_ag_key[1] %}
 {% if 'as_set' in af_ag_val and af_ag_val['as_set'] == 'true' %}

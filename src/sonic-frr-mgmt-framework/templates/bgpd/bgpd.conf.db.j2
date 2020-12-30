@@ -153,7 +153,7 @@ router bgp {{ bgp_sess['local_asn']}} vrf {{ vrf }}
 {# -------globals end --------------------------- #}
 {# -------peer-group --------------------------- #}
 {% if BGP_PEER_GROUP is defined and BGP_PEER_GROUP|length > 0 %}
-{% for peer_group, nbr_or_peer in BGP_PEER_GROUP.iteritems() %}
+{% for peer_group, nbr_or_peer in BGP_PEER_GROUP.items() %}
 {% if vrf == peer_group[0] %}
 {% set name_or_ip = peer_group[1] %}
 {% set nbr_or_peer_type = 'peer-group' %}
@@ -164,7 +164,7 @@ router bgp {{ bgp_sess['local_asn']}} vrf {{ vrf }}
 {# -------peer-group end --------------------------- #}
 {# -------neighbor --------------------------- #}
 {% if BGP_NEIGHBOR is defined and BGP_NEIGHBOR|length > 0 %}
-{% for nbr_addr, nbr_or_peer in BGP_NEIGHBOR.iteritems() %}
+{% for nbr_addr, nbr_or_peer in BGP_NEIGHBOR.items() %}
 {% if nbr_addr is not string and nbr_addr|length > 1 %}
 {% if vrf == nbr_addr[0] %}
 {% set name_or_ip = nbr_addr[1] %}

@@ -9,7 +9,7 @@
 {% block bfd_shop_peers %}
 {% if BFD_PEER_SINGLE_HOP %}
 bfd
-{% for (peer_key, peer_info) in BFD_PEER_SINGLE_HOP.iteritems() %}
+{% for (peer_key, peer_info) in BFD_PEER_SINGLE_HOP.items() %}
 {% set peer_args = '' %}
 {% if peer_key[0] != 'null' %}
 {% set peer_args = peer_args~' '~'peer'~' '~peer_key[0] %}
@@ -53,7 +53,7 @@ bfd
 {% block bfd_mhop_peers %}
 {% if BFD_PEER_MULTI_HOP %}
 bfd
-{% for (peer_key, peer_info) in BFD_PEER_MULTI_HOP.iteritems() %}
+{% for (peer_key, peer_info) in BFD_PEER_MULTI_HOP.items() %}
 {% set peer_args = '' %}
 {% if peer_key[0] != 'null' %}
 {% set peer_args = peer_args~' '~'peer'~' '~peer_key[0] %}

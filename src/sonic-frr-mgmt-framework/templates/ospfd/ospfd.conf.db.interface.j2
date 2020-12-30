@@ -1,7 +1,7 @@
 {# ------------------------------------------------------------------------------------ #}
 {# ------------------------------------------------------------------------------------ #}
 {% if OSPFV2_INTERFACE is defined and OSPFV2_INTERFACE|length > 0 %}
-{% for (intfkey, ospf_intf_instance) in OSPFV2_INTERFACE.iteritems() %}
+{% for (intfkey, ospf_intf_instance) in OSPFV2_INTERFACE.items() %}
 !
 {% set intfname = intfkey[0] %}
 {% set intfaddr = intfkey[1] %}
