@@ -503,10 +503,13 @@ class BGPKeyMapInfo:
         else:
             self.hdl_func = hdlr
         self.data = data
+    def same_daemons(self, other):
+        dset = lambda d: set() if d is None else set(d)
+        return dset(self.daemons) == dset(other.daemons)
     def __eq__(self, other):
-        return set(self.daemons) == set(other.daemons) and self.run_cmd == other.run_cmd
+        return self.same_daemons(other) and self.run_cmd == other.run_cmd
     def __ne__(self, other):
-        return set(self.daemons) != set(other.daemons) or self.run_cmd != other.run_cmd
+        return not self.same_daemons(other) or self.run_cmd != other.run_cmd
     def __hash__(self):
         return hash(self.run_cmd)
     def get_command(self, daemon, op, st_idx, *vals):
@@ -1650,7 +1653,7 @@ class IpNextHop:
         return 'AF %d BKH %s IP %s TRACK %d INTF %s TAG %d DIST %d VRF %s' % (
                 self.af, self.blackhole, self.ip, self.track, self.interface, self.tag, self.distance, self.nh_vrf)
     def is_zero_ip(self):
-        return sum([ord(x) for x in socket.inet_pton(self.af, self.ip)]) == 0
+        return sum([x for x in socket.inet_pton(self.af, self.ip)]) == 0
     def get_arg_list(self):
         arg = lambda x: '' if x is None else x
         num_arg = lambda x: '' if x is None or x == 0 else str(x)
