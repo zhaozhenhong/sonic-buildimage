@@ -10,7 +10,7 @@ if [ -n "$MGMT_FRAMEWORK_CONFIG" ] && [ "$MGMT_FRAMEWORK_CONFIG" == "true" ]; th
         -d \
         -y /etc/sonic/constants.yml \
         -t /usr/share/sonic/templates/frr_vars.j2 \
-        -t /usr/local/frr/supervisord/supervisord.conf.j2,/etc/supervisor/conf.d/supervisord.conf \
+        -t /usr/share/sonic/templates/supervisord/supervisord.conf.j2,/etc/supervisor/conf.d/supervisord.conf \
         -t /usr/local/frr/bgpd/bgpd.conf.j2,/etc/frr/bgpd.conf \
         -t /usr/share/sonic/templates/zebra/zebra.conf.j2,/etc/frr/zebra.conf \
         -t /usr/local/frr/staticd/staticd.conf.j2,/etc/frr/staticd.conf \

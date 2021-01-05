@@ -3,7 +3,7 @@ import setuptools
 setuptools.setup(
     name = 'sonic-frr-mgmt-framework',
     version = '1.0',
-    description = 'Utility to dynamically configuration FRR based on database update',
+    description = 'Utility to dynamically configuration FRR based on config DB data update event',
     url = 'https://github.com/Azure/sonic-buildimage',
     packages = setuptools.find_packages(),
     entry_points = {
@@ -28,7 +28,6 @@ setuptools.setup(
     ],
     data_files = [('frr/common', ['templates/common/daemons.common.conf.j2']),
                   ('frr/bgpd', ['templates/bgpd/bgpd.conf.db.j2',
-                                'templates/bgpd/bgpd.spine_chassis_frontend_router.conf.j2',
                                 'templates/bgpd/bgpd.conf.j2',
                                 'templates/bgpd/bgpd.conf.db.route_map.j2',
                                 'templates/bgpd/bgpd.conf.db.pref_list.j2',
@@ -48,7 +47,6 @@ setuptools.setup(
                   ('frr/staticd', ['templates/staticd/staticd.conf.j2',
                                    'templates/staticd/staticd.db.conf.j2',
                                    'templates/staticd/staticd.default_route.conf.j2']),
-                  ('frr/supervisord', ['templates/supervisord/supervisord.conf.j2',
-                                       'templates/supervisord/critical_processes'])
+                  ('frr/supervisord', ['templates/supervisord/critical_processes'])
     ]
 )
