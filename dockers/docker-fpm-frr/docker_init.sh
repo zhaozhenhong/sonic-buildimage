@@ -4,16 +4,16 @@ mkdir -p /etc/frr
 mkdir -p /etc/supervisor/conf.d
 
 MGMT_FRAMEWORK_CONFIG=`sonic-cfggen -d -v 'DEVICE_METADATA["localhost"]["frr_mgmt_framework_config"]'`
-    CFGGEN_PARAMS=" \
-        -d \
-        -y /etc/sonic/constants.yml \
-        -t /usr/share/sonic/templates/frr_vars.j2 \
-        -t /usr/share/sonic/templates/supervisord/supervisord.conf.j2,/etc/supervisor/conf.d/supervisord.conf \
-        -t /usr/share/sonic/templates/supervisord/critical_processes.j2,/etc/supervisor/critical_processes \
-        -t /usr/share/sonic/templates/zebra/zebra.conf.j2,/etc/frr/zebra.conf \
-        -t /usr/share/sonic/templates/frr.conf.j2,/etc/frr/frr.conf \
-        -t /usr/share/sonic/templates/isolate.j2,/usr/sbin/bgp-isolate \
-        -t /usr/share/sonic/templates/unisolate.j2,/usr/sbin/bgp-unisolate \
+CFGGEN_PARAMS=" \
+    -d \
+    -y /etc/sonic/constants.yml \
+    -t /usr/share/sonic/templates/frr_vars.j2 \
+    -t /usr/share/sonic/templates/supervisord/supervisord.conf.j2,/etc/supervisor/conf.d/supervisord.conf \
+    -t /usr/share/sonic/templates/supervisord/critical_processes.j2,/etc/supervisor/critical_processes \
+    -t /usr/share/sonic/templates/zebra/zebra.conf.j2,/etc/frr/zebra.conf \
+    -t /usr/share/sonic/templates/frr.conf.j2,/etc/frr/frr.conf \
+    -t /usr/share/sonic/templates/isolate.j2,/usr/sbin/bgp-isolate \
+    -t /usr/share/sonic/templates/unisolate.j2,/usr/sbin/bgp-unisolate \
 "
 if [ -n "$MGMT_FRAMEWORK_CONFIG" ] && [ "$MGMT_FRAMEWORK_CONFIG" == "true" ]; then
     CFGGEN_PARAMS+=" \
