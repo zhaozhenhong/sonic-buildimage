@@ -4,44 +4,29 @@ mkdir -p /etc/frr
 mkdir -p /etc/supervisor/conf.d
 
 MGMT_FRAMEWORK_CONFIG=`sonic-cfggen -d -v 'DEVICE_METADATA["localhost"]["frr_mgmt_framework_config"]'`
-CRIT_PROC_BACKUP="/usr/local/frr/supervisord/critical_processes.bak"
-if [ -n "$MGMT_FRAMEWORK_CONFIG" ] && [ "$MGMT_FRAMEWORK_CONFIG" == "true" ]; then
     CFGGEN_PARAMS=" \
         -d \
         -y /etc/sonic/constants.yml \
         -t /usr/share/sonic/templates/frr_vars.j2 \
         -t /usr/share/sonic/templates/supervisord/supervisord.conf.j2,/etc/supervisor/conf.d/supervisord.conf \
-        -t /usr/local/frr/bgpd/bgpd.conf.j2,/etc/frr/bgpd.conf \
+        -t /usr/share/sonic/templates/supervisord/critical_processes.j2,/etc/supervisor/critical_processes \
         -t /usr/share/sonic/templates/zebra/zebra.conf.j2,/etc/frr/zebra.conf \
-        -t /usr/local/frr/staticd/staticd.conf.j2,/etc/frr/staticd.conf \
         -t /usr/share/sonic/templates/frr.conf.j2,/etc/frr/frr.conf \
         -t /usr/share/sonic/templates/isolate.j2,/usr/sbin/bgp-isolate \
         -t /usr/share/sonic/templates/unisolate.j2,/usr/sbin/bgp-unisolate \
+"
+if [ -n "$MGMT_FRAMEWORK_CONFIG" ] && [ "$MGMT_FRAMEWORK_CONFIG" == "true" ]; then
+    CFGGEN_PARAMS+=" \
+        -t /usr/local/frr/staticd/staticd.conf.j2,/etc/frr/staticd.conf \
+        -t /usr/local/frr/bgpd/bgpd.conf.j2,/etc/frr/bgpd.conf \
         -t /usr/local/frr/bfdd/bfdd.conf.j2,/etc/frr/bfdd.conf \
         -t /usr/local/frr/ospfd/ospfd.conf.j2,/etc/frr/ospfd.conf \
     "
-    if [ ! -f $CRIT_PROC_BACKUP ]; then
-        mv /etc/supervisor/critical_processes $CRIT_PROC_BACKUP
-    fi
-    # change critical process list with those of enterprise release
-    cp /usr/local/frr/supervisord/critical_processes /etc/supervisor
 else
-    CFGGEN_PARAMS=" \
-        -d \
-        -y /etc/sonic/constants.yml \
-        -t /usr/share/sonic/templates/supervisord/frr_vars.j2 \
-        -t /usr/share/sonic/templates/supervisord/supervisord.conf.j2,/etc/supervisor/conf.d/supervisord.conf \
+    CFGGEN_PARAMS+=" \
         -t /usr/share/sonic/templates/bgpd/bgpd.conf.j2,/etc/frr/bgpd.conf \
-        -t /usr/share/sonic/templates/zebra/zebra.conf.j2,/etc/frr/zebra.conf \
         -t /usr/share/sonic/templates/staticd/staticd.conf.j2,/etc/frr/staticd.conf \
-        -t /usr/share/sonic/templates/frr.conf.j2,/etc/frr/frr.conf \
-        -t /usr/share/sonic/templates/isolate.j2,/usr/sbin/bgp-isolate \
-        -t /usr/share/sonic/templates/unisolate.j2,/usr/sbin/bgp-unisolate \
     "
-    if [ -f $CRIT_PROC_BACKUP ]; then
-        # restore original critical process list for community release
-        mv -f $CRIT_PROC_BACKUP /etc/supervisor/critical_processes
-    fi
 fi
 CONFIG_TYPE=$(sonic-cfggen $CFGGEN_PARAMS)
 
@@ -80,8 +65,8 @@ if [ -z "$CONFIG_TYPE" ] || [ "$CONFIG_TYPE" == "separated" ]; then
     rm -f /etc/frr/frr.conf
 elif [ "$CONFIG_TYPE" == "unified" ]; then
     echo "service integrated-vtysh-config" > /etc/frr/vtysh.conf
-    rm -f /etc/frr/bgpd.conf /etc/frr/zebra.conf /etc/frr/staticd.conf
-    rm -f /etc/frr/bfdd.conf /etc/frr/ospfd.conf /etc/frr/pimd.conf
+    rm -f /etc/frr/bgpd.conf /etc/frr/zebra.conf /etc/frr/staticd.conf \
+          /etc/frr/bfdd.conf /etc/frr/ospfd.conf /etc/frr/pimd.conf
 fi
 
 chown -R frr:frr /etc/frr/

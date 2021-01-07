@@ -1,8 +1,0 @@
-program:zebra
-program:staticd
-program:bfdd
-program:bgpd
-program:ospfd
-program:pimd
-program:fpmsyncd
-program:frrcfgd

@@ -46,7 +46,6 @@ setuptools.setup(
                                  'templates/ospfd/ospfd.conf.db.vlink.j2']),
                   ('frr/staticd', ['templates/staticd/staticd.conf.j2',
                                    'templates/staticd/staticd.db.conf.j2',
-                                   'templates/staticd/staticd.default_route.conf.j2']),
-                  ('frr/supervisord', ['templates/supervisord/critical_processes'])
+                                   'templates/staticd/staticd.default_route.conf.j2'])
     ]
 )
