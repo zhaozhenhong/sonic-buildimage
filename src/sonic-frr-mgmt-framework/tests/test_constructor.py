@@ -1,17 +1,21 @@
 import socket
 import pytest
+from unittest.mock import MagicMock, NonCallableMagicMock, patch
 
-from frrcfgd.frrcfgd import CachedDataWithOp
-from frrcfgd.frrcfgd import BGPPeerGroup
-from frrcfgd.frrcfgd import BGPKeyMapInfo
-from frrcfgd.frrcfgd import BGPKeyMapList
-from frrcfgd.frrcfgd import get_command_cmn
-from frrcfgd.frrcfgd import CommunityList
-from frrcfgd.frrcfgd import MatchPrefix
-from frrcfgd.frrcfgd import MatchPrefixList
-from frrcfgd.frrcfgd import AggregateAddr
-from frrcfgd.frrcfgd import IpNextHop
-from frrcfgd.frrcfgd import IpNextHopSet
+swsssdk_module_mock = MagicMock(ConfigDBConnector = NonCallableMagicMock)
+
+with patch.dict('sys.modules', swsssdk = swsssdk_module_mock):
+    from frrcfgd.frrcfgd import CachedDataWithOp
+    from frrcfgd.frrcfgd import BGPPeerGroup
+    from frrcfgd.frrcfgd import BGPKeyMapInfo
+    from frrcfgd.frrcfgd import BGPKeyMapList
+    from frrcfgd.frrcfgd import get_command_cmn
+    from frrcfgd.frrcfgd import CommunityList
+    from frrcfgd.frrcfgd import MatchPrefix
+    from frrcfgd.frrcfgd import MatchPrefixList
+    from frrcfgd.frrcfgd import AggregateAddr
+    from frrcfgd.frrcfgd import IpNextHop
+    from frrcfgd.frrcfgd import IpNextHopSet
 
 def test_data_with_op():
     data = CachedDataWithOp()
