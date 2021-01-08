@@ -3,7 +3,7 @@
 mkdir -p /etc/frr
 mkdir -p /etc/supervisor/conf.d
 
-MGMT_FRAMEWORK_CONFIG=`sonic-cfggen -d -v 'DEVICE_METADATA["localhost"]["frr_mgmt_framework_config"]'`
+MGMT_FRAMEWORK_CONFIG=$(sonic-cfggen -d -v 'DEVICE_METADATA["localhost"]["frr_mgmt_framework_config"]')
 CFGGEN_PARAMS=" \
     -d \
     -y /etc/sonic/constants.yml \
