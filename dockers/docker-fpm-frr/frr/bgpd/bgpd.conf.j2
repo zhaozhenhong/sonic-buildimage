@@ -14,11 +14,15 @@
 !
 agentx
 !
+{% if DEVICE_METADATA.localhost.frr_mgmt_framework_config is defined and DEVICE_METADATA.localhost.frr_mgmt_framework_config == "true" %}
+{% include "bgpd.conf.db.j2" %}
+{% else %}
 {% if DEVICE_METADATA['localhost']['type'] == "SpineChassisFrontendRouter" %}
 {%  include "bgpd.spine_chassis_frontend_router.conf.j2" %}
 {% endif %}
 !
 {% include "bgpd.main.conf.j2" %}
+{% endif %}
 !
 ! end of template: bgpd/bgpd.conf.j2
 !
