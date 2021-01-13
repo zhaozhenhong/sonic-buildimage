@@ -1,3 +1,7 @@
+! template: staticd/staticd.db.conf.j2
+!
+! Static Route configuration using config DB static route table
+!
 {% macro iproute(ip_prefix, nh_blackhole, nh_ip, nh_intf, nh_dist, nh_tag, nh_vrf) %}
     {%- set ns = namespace(str = None) %}
     {%- set ip_addr = ip_prefix.split('/')[0] %}
