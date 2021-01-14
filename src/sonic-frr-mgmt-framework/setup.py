@@ -26,7 +26,8 @@ setuptools.setup(
         'pytest-cov',
         'sonic-config-engine'
     ],
-    data_files = [('sonic/frr', ['templates/bgpd/bgpd.conf.db.j2',
+    data_files = [('sonic/frr', ['templates/bgpd/bgpd.conf.j2',
+                                 'templates/bgpd/bgpd.conf.db.j2',
                                  'templates/bgpd/bgpd.conf.db.route_map.j2',
                                  'templates/bgpd/bgpd.conf.db.pref_list.j2',
                                  'templates/bgpd/bgpd.conf.db.nbr_or_peer.j2',
@@ -42,6 +43,7 @@ setuptools.setup(
                                  'templates/ospfd/ospfd.conf.db.interface.j2',
                                  'templates/ospfd/ospfd.conf.db.policyrange.j2',
                                  'templates/ospfd/ospfd.conf.db.vlink.j2',
+                                 'templates/staticd/staticd.conf.j2',
                                  'templates/staticd/staticd.db.conf.j2'])
     ]
 )
