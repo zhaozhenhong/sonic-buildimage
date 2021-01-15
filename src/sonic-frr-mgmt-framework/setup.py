@@ -44,6 +44,8 @@ setuptools.setup(
                                  'templates/ospfd/ospfd.conf.db.policyrange.j2',
                                  'templates/ospfd/ospfd.conf.db.vlink.j2',
                                  'templates/staticd/staticd.conf.j2',
-                                 'templates/staticd/staticd.db.conf.j2'])
+                                 'templates/staticd/staticd.db.conf.j2',
+                                 'templates/staticd/staticd.db.default_route.conf.j2',
+                                 'templates/frr/frr.conf.j2'])
     ]
 )

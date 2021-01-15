@@ -13,27 +13,9 @@ agentx
 !
 {% include "zebra/zebra.interfaces.conf.j2" %}
 !
-{% if DEVICE_METADATA.localhost.frr_mgmt_framework_config is defined and DEVICE_METADATA.localhost.frr_mgmt_framework_config == "true" %}
-{% if MGMT_VRF_CONFIG %}
-{% if MGMT_VRF_CONFIG['vrf_global']['mgmtVrfEnabled'] == 'false' %}
-{% include "staticd.default_route.conf.j2" %}
-{% endif %}
-{% else %}
-{% include "staticd.default_route.conf.j2" %}
-{% endif %}
-!
-{% include "staticd.db.conf.j2" %}
-!
-{% include "bgpd.conf.db.j2" %}
-!
-{% include "ospfd.conf.j2" %}
-!
-{% include "bfdd.conf.j2" %}
-{% else %}
 {% include "staticd/staticd.default_route.conf.j2" %}
 !
 {% include "staticd/staticd.loopback_route.conf.j2" %}
 !
 {% include "bgpd/bgpd.main.conf.j2" %}
-{% endif %}
 !

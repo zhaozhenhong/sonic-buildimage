@@ -8,11 +8,11 @@ CFGGEN_PARAMS=" \
     -y /etc/sonic/constants.yml \
     -t /usr/share/sonic/templates/frr_vars.j2 \
     -t /usr/share/sonic/templates/supervisord/supervisord.conf.j2,/etc/supervisor/conf.d/supervisord.conf \
-    -t /usr/share/sonic/templates/gen_bgpd.conf.j2,/etc/frr/bgpd.conf \
+    -t /usr/share/sonic/templates/bgpd/gen_bgpd.conf.j2,/etc/frr/bgpd.conf \
     -t /usr/share/sonic/templates/supervisord/critical_processes.j2,/etc/supervisor/critical_processes \
     -t /usr/share/sonic/templates/zebra/zebra.conf.j2,/etc/frr/zebra.conf \
-    -t /usr/share/sonic/templates/gen_staticd.conf.j2,/etc/frr/staticd.conf \
-    -t /usr/share/sonic/templates/frr.conf.j2,/etc/frr/frr.conf \
+    -t /usr/share/sonic/templates/staticd/gen_staticd.conf.j2,/etc/frr/staticd.conf \
+    -t /usr/share/sonic/templates/gen_frr.conf.j2,/etc/frr/frr.conf \
     -t /usr/share/sonic/templates/isolate.j2,/usr/sbin/bgp-isolate \
     -t /usr/share/sonic/templates/unisolate.j2,/usr/sbin/bgp-unisolate \
     -t /usr/local/sonic/frr/bfdd.conf.j2,/etc/frr/bfdd.conf \
