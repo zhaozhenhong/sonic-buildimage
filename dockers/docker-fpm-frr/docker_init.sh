@@ -15,8 +15,8 @@ CFGGEN_PARAMS=" \
     -t /usr/share/sonic/templates/gen_frr.conf.j2,/etc/frr/frr.conf \
     -t /usr/share/sonic/templates/isolate.j2,/usr/sbin/bgp-isolate \
     -t /usr/share/sonic/templates/unisolate.j2,/usr/sbin/bgp-unisolate \
-    -t /usr/local/sonic/frr/bfdd.conf.j2,/etc/frr/bfdd.conf \
-    -t /usr/local/sonic/frr/ospfd.conf.j2,/etc/frr/ospfd.conf \
+    -t /usr/local/sonic/frrcfgd/bfdd.conf.j2,/etc/frr/bfdd.conf \
+    -t /usr/local/sonic/frrcfgd/ospfd.conf.j2,/etc/frr/ospfd.conf \
 "
 
 FRR_VARS=$(sonic-cfggen $CFGGEN_PARAMS)
