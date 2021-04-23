@@ -25,7 +25,7 @@ route-map {{rm_key[0]}} {{rm_val['route_operation']}} {{rm_key[1]}}
  match source-vrf {{rm_val['match_src_vrf']}}
 {% endif %}
 {# ---------------match ip/ipv6-Start-------------------------- #}
-{% set ip_str = {'ipv4':'ip', 'ipv6':'ipv6' } %}
+{% set ip_str = {'IPv4':'ip', 'IPv6':'ipv6' } %}
 {% if PREFIX_SET is defined and PREFIX_SET|length > 0 %}
 {% if 'match_prefix_set' in rm_val %}
 {% for pfx_key, pfx_val in PREFIX_SET.items() %}
@@ -59,15 +59,22 @@ route-map {{rm_key[0]}} {{rm_val['route_operation']}} {{rm_key[1]}}
  match source-protocol {{rm_val['match_protocol']}}
 {% endif %}
 {# ---------------set as-path prepend - Start ----------------- #}
-{% if 'set_asn' in rm_val and 'set_repeat_asn' in rm_val %}
 {% set ns = namespace(as_str='') %}
-{% if rm_val['set_repeat_asn'] > 0 %}
+{% if 'set_asn' in rm_val and 'set_repeat_asn' in rm_val %}
+{% if rm_val['set_repeat_asn']|int > 0 %}
 {% for i in range(rm_val['set_repeat_asn']|int) %}
-{% set ns.as_str = ns.as_str+' '+rm_val['set_asn'] %}
+{% set ns.as_str = ns.as_str + ' ' + rm_val['set_asn'] %}
 {% endfor %}
 {% else %}
 {% set ns.as_str = rm_val['set_asn'] %}
 {% endif %}
+{% endif %}
+{% if 'set_asn_list' in rm_val %}
+{% for asn in rm_val['set_asn_list'].split(',') %}
+{% set ns.as_str = ns.as_str + ' ' + asn %}
+{% endfor %}
+{% endif %}
+{% if ns.as_str|length > 0 %}
  set as-path prepend{{ns.as_str}}
 {% endif %}
 {# ---------------set as-path prepend - End ------------------- #}
@@ -79,10 +86,19 @@ route-map {{rm_key[0]}} {{rm_val['route_operation']}} {{rm_key[1]}}
 {% endfor %}
  set community{{ns.comms}}
 {% endif %}
-{# ---------------set community - End-------------------------- #}
 {% if 'set_community_ref' in rm_val %}
- set community {{rm_val['set_community_ref']}}
+{% set ns = namespace(comms = '') %}
+{% set cm_name = rm_val['set_community_ref'] %}
+{% if COMMUNITY_SET is defined and cm_name in COMMUNITY_SET and 'community_member' in COMMUNITY_SET[cm_name] %}
+{% for cm in COMMUNITY_SET[cm_name]['community_member'] %}
+{% set ns.comms = ns.comms + ' ' + cm %}
+{% endfor %}
 {% endif %}
+{% if ns.comms|length > 0 %}
+ set community{{ns.comms}}
+{% endif %}
+{% endif %}
+{# ---------------set community - End-------------------------- #}
 {# ---------------set extcommunity - Start--------------------- #}
 {% if 'set_ext_community_inline' in rm_val %}
 {% set ec_ns = namespace(rt_str='', soo_str='') %}
@@ -102,10 +118,28 @@ route-map {{rm_key[0]}} {{rm_val['route_operation']}} {{rm_key[1]}}
  set extcommunity soo{{ec_ns.rt_str}}
 {% endif %}
 {% endif %}
-{# ---------------set extcommunity - End----------------------- #}
 {% if 'set_ext_community_ref' in rm_val %}
- set extcommunity {{rm_val['set_ext_community_ref']}}
+{% set ec_ns = namespace(rt_str='', soo_str='') %}
+{% set cm_name = rm_val['set_ext_community_ref'] %}
+{% if EXTENDED_COMMUNITY_SET is defined and cm_name in EXTENDED_COMMUNITY_SET and 'community_member' in EXTENDED_COMMUNITY_SET[cm_name] %}
+{% for cm in EXTENDED_COMMUNITY_SET[cm_name]['community_member'] %}
+{% set tks = cm.split(':', 1) %}
+{% if tks[0] == 'route-target' %}
+{% set ec_ns.rt_str = ec_ns.rt_str + ' ' + tks[1] %}
 {% endif %}
+{% if tks[0] == 'route-origin' %}
+{% set ec_ns.soo_str = ec_ns.soo_str + ' ' + tks[1] %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if ec_ns.rt_str|length > 0 %}
+ set extcommunity rt{{ec_ns.rt_str}}
+{% endif %}
+{% if ec_ns.soo_str|length > 0 %}
+ set extcommunity soo{{ec_ns.soo_str}}
+{% endif %}
+{% endif %}
+{# ---------------set extcommunity - End----------------------- #}
 {% if 'set_next_hop' in rm_val %}
  set ip next-hop {{rm_val['set_next_hop']}}
 {% endif %}
@@ -115,8 +149,8 @@ route-map {{rm_key[0]}} {{rm_val['route_operation']}} {{rm_key[1]}}
 {% if 'set_ipv6_next_hop_prefer_global' in rm_val and rm_val['set_ipv6_next_hop_prefer_global'] == 'true' %}
  set ipv6 next-hop prefer-global
 {% endif %}
-{% if 'set_local_preference' in rm_val %}
- set local-preference {{rm_val['set_local_preference']}}
+{% if 'set_local_pref' in rm_val %}
+ set local-preference {{rm_val['set_local_pref']}}
 {% endif %}
 {# ---------------set metric and med - Start--------------------- #}
 {% if 'set_metric_action' in rm_val %}

@@ -46,6 +46,8 @@ setuptools.setup(
                                      'templates/staticd/staticd.conf.j2',
                                      'templates/staticd/staticd.db.conf.j2',
                                      'templates/staticd/staticd.db.default_route.conf.j2',
+                                     'templates/zebra/zebra.interfaces.conf.j2',
+                                     'templates/zebra/zebra.conf.j2',
                                      'templates/frr/frr.conf.j2'])
     ]
 )
